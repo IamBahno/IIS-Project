@@ -1,0 +1,18 @@
+# Virtual Environment
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+__pycache__/
+.pytest_cache/
+
+
+# Flask's development server logs
+instance/
+
+
+# Editor/IDE specific files
+.vscode/
+.idea/
