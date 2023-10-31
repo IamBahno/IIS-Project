@@ -2,6 +2,7 @@ from app import db
 from datetime import datetime
 from sqlalchemy import ForeignKeyConstraint
 
+#TODO unique attributes and nullabel = False
 
 user_system = db.Table('user_system',
                     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -16,15 +17,15 @@ class User(db.Model):
     hashed_password = db.Column(db.String(128),nullable =False)
     first_name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
-    role = db.Column(db.String(30))
+    role = db.Column(db.String(30),nullable = False)
 
 
     # 1:N create values
     values = db.relationship('Value',backref="user")
     # 1:N manage devices
-    devices = db.relationship('Device',backref="user")
+    devices = db.relationship('Device',backref="user",cascade='all, delete')
     # 1:N manage systems
-    managed_systems = db.relationship('System',backref="user")
+    managed_systems = db.relationship('System',backref="user",cascade='all, delete')
     # N:M used systems
     used_systems = db.relationship('System',secondary=user_system,backref='users')
     # 1:N defined kpis
@@ -33,7 +34,7 @@ class User(db.Model):
 class System(db.Model):
     __tablename__ = "system"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
+    name = db.Column(db.String(50),unique = True,nullable = False)
     description = db.Column(db.String(200))
 
     # owner/ manager of system
@@ -43,14 +44,14 @@ class System(db.Model):
     devices = db.relationship('Device',backref="system_back_ref")
 
     # 1:N system kpi
-    kpis = db.relationship('Kpi',backref="system_back_ref_2")
+    kpis = db.relationship('Kpi',backref="system_back_ref_2",cascade='all, delete')
 
     #M:N users systems already define in User
 
 class Device(db.Model):
     __tablename__ = "device"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
+    name = db.Column(db.String(50),nullable =False)
     description = db.Column(db.String(200))
     
     #device owner/manager
@@ -58,7 +59,7 @@ class Device(db.Model):
     #system
     system = db.Column(db.Integer,db.ForeignKey('system.id'))
     # 1:N device values
-    values = db.relationship('Value',backref="device_back_ref")
+    values = db.relationship('Value',backref="device_back_ref",cascade='all, delete')
 
     #device type
     device_type_id = db.Column(db.Integer,db.ForeignKey('device_type.id'))
@@ -70,10 +71,10 @@ class DeviceType(db.Model):
     name = db.Column(db.String(50), unique=True, nullable = False)
 
     #devicetype is strong entity for parameter
-    parameters = db.relationship('Parameter',backref="device_type_back_ref_1")
+    parameters = db.relationship('Parameter',backref="device_type_back_ref_1",cascade='all, delete')
 
     #devices that are this device type
-    devices = db.relationship('Device',backref="device_type_back_ref_2")
+    devices = db.relationship('Device',backref="device_type_back_ref_2",cascade='all, delete')
 
 
 
@@ -93,6 +94,7 @@ class Parameter(db.Model):
 class Kpi(db.Model):
     __tablename__ = "kpi"
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False)
     description = db.Column(db.String(200))
     lower_limit = db.Column(db.Float)
     upper_limit = db.Column(db.Float)

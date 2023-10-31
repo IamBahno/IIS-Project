@@ -119,8 +119,8 @@ def test_user_manages_systems(client):
 
 def test_users_use_systems(client):
     # Create users
-    user1 = User(username="user1", hashed_password="password1")
-    user2 = User(username="user2", hashed_password="password2")
+    user1 = User(username="user1", hashed_password="password1",role="manager")
+    user2 = User(username="user2", hashed_password="password2",role="manager")
 
     # Create systems
     system1 = System(name="System1", description="System for testing 1")
@@ -156,7 +156,7 @@ def test_users_use_systems(client):
 
 def test_device_manager(client):
     # Create a user who will be the owner/manager of the device
-    manager = User(username="manager", hashed_password="managerpassword")
+    manager = User(username="manager", hashed_password="managerpassword",role="value_setter")
 
     # Create a device and set the owner/manager to the user
     device = Device(name="Managed Device", description="Device with manager", device_manager=manager)
@@ -288,7 +288,7 @@ def test_create_device_type_with_device_and_values(client):
 
 def test_user_create_system_with_devices_and_kpi(client):
     # Create a user
-    user = User(username="test_user", hashed_password="test_password")
+    user = User(username="test_user", hashed_password="test_password",role="user")
     db.session.add(user)
     db.session.commit()
 
@@ -327,7 +327,8 @@ def test_user_create_system_with_devices_and_kpi(client):
 
     # Create a KPI for the system, device type, and parameter
     kpi = Kpi(
-        description="Test KPI",
+        name="Test Kpi name",
+        description="Test KPI description",
         lower_limit=4.0,
         upper_limit=6.0,
         creater=user.id,
