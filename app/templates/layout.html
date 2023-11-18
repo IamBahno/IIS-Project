@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="../static/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Form</title>
 </head>
 <body>
     <header class="site-header">
-        <form id="myForm" action="/register" method="get">
-            <button type="submit">register</button>
-        </form>
-        <form id="myForm" action="/login" method="get">
-            <button type="submit">login</button>
-        </form>
+        <ul>
+            <li><a href="/register">Register</a></li>
+            <li><a href="/login">Login</a></li>
+            <li class="right"><a href="/logout">Logout</a></li>
+        </ul>
         <!-- ukazat jmeno uzivatele a roli asi-->
         <!-- jmeno aktualni zalozka -->
     </header>
-    <main role="main" class="container">
+    <main role="main" class="container clear">
         {% block content %}{% endblock %}
     </main>
     

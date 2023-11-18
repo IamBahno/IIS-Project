@@ -1,0 +1,35 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+.clear{
+    clear: both;
+}
+
+.site-header{
+    ul{
+        list-style-type: none;
+        overflow: hidden;
+        background-color: black;
+        li{
+            float:left;
+            a{
+                display:block;
+                padding: 20px 20px 20px 20px;
+                text-align: center;
+                text-decoration: none;
+                color: white;
+            }
+            h1{
+                margin:auto;
+            }
+        }
+        li a:hover{
+            background-color: blue;
+        }
+        .right{
+            float: right;
+        }
+    }
+}
