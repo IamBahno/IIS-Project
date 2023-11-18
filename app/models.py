@@ -1,6 +1,7 @@
-from app import db
+from app import db, login_manager
 from datetime import datetime
 from sqlalchemy import ForeignKeyConstraint
+from flask_login import UserMixin
 
 
 user_system = db.Table('user_system',
@@ -8,7 +9,11 @@ user_system = db.Table('user_system',
                     db.Column('system_id', db.Integer, db.ForeignKey('system.id'))
                     )
 
-class User(db.Model):
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+class User(db.Model, UserMixin):
     __tablename__ = "user"
     #PK
     id = db.Column(db.Integer, primary_key=True)                     
