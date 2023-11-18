@@ -1,6 +1,7 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for
 from app.models import User,System
 from app import db, bcrypt
+from flask_login import login_user
 
 auth = Blueprint('auth', __name__)
 
@@ -55,6 +56,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and bcrypt.check_password_hash(user.hashed_password,password):
             flash('Login successful', 'success')
+            login_user(user)
             logged_user = username
             return redirect(url_for('auth.home'))
 
