@@ -1,7 +1,7 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for
 from app.models import User,System
 from app import db, bcrypt
-from flask_login import login_user, current_user
+from flask_login import login_user, logout_user, login_required, current_user
 
 auth = Blueprint('auth', __name__)
 
@@ -48,6 +48,8 @@ logged_user = None
 
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for(auth.home))
     # Login form (you can handle this part)
     # Extract login form data and perform login logic here
     if request.method == 'POST':
@@ -64,8 +66,15 @@ def login():
             flash('Login failed. Please check your credentials.', 'danger')
     return render_template('login.html', title='Login')
 
+@auth.route("/logout", methods=['GET', 'POST'])
+def logout():
+    logout_user()
+    return redirect(url_for('auth.home'))
+
 @auth.route("/register", methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for(auth.home))
     if request.method == 'POST':
 #         # Registration form
         username = request.form['username']
@@ -126,3 +135,8 @@ def system_create():
             print("system created")
             return redirect(url_for('auth.systems'))
     return render_template('system_create.html')
+
+# @auth.route("/test",methods=['GET', 'POST'])
+# @login_required
+# def test():
+#     pass
