@@ -9,7 +9,7 @@
         <div class="system-kpis">                 
             {% for kpis in system.kpis %}
                 <span class="system-kpi-name">{{ kpis.name }}</span>
-                <span class="system-kpi-state">{{ kpis.state }}</span>
+                <span class="system-kpi-state {% if kpis.state == "OK" %}status_ok{% else %}status_error{% endif %}">{{ kpis.state }}</span>
             {% endfor %}
         </div>
         <form method="POST">
