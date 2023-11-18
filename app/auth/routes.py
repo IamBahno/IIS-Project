@@ -43,6 +43,8 @@ auth = Blueprint('auth', __name__)
 
 #     return render_template('index.html', user_data=user_data)
 
+logged_user = None
+
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
     # Login form (you can handle this part)
