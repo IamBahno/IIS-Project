@@ -7,6 +7,14 @@
     clear: both;
 }
 
+.status_ok{
+    color: #33ff33;
+}
+
+.status_error{
+    color: red;
+}
+
 .site-header{
     ul{
         list-style-type: none;
