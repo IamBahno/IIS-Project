@@ -6,6 +6,19 @@
     <title>Input Form</title>
 </head>
 <body>
-    {% block content %}{% endblock %}
+    <header class="site-header">
+        <form id="myForm" action="/register" method="get">
+            <button type="submit">register</button>
+        </form>
+        <form id="myForm" action="/login" method="get">
+            <button type="submit">login</button>
+        </form>
+        <!-- ukazat jmeno uzivatele a roli asi-->
+        <!-- jmeno aktualni zalozka -->
+    </header>
+    <main role="main" class="container">
+        {% block content %}{% endblock %}
+    </main>
+    
 </body>
 </html>
