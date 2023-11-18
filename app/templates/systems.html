@@ -12,16 +12,19 @@
                 <span class="system-kpi-state {% if kpis.state == "OK" %}status_ok{% else %}status_error{% endif %}">{{ kpis.state }}</span>
             {% endfor %}
         </div>
+        {% if current_user.is_authenticated %}
         <form method="POST">
             <button type="submit" name="system-button">{{ system.button }}</button>
         </form>
+        {% endif %}
         <br>
     </div>
     {% endfor %}
-
+    {% if current_user.is_authenticated %}
     <form method="POST">
         <button type="submit" name="add-system-button">Create system</button>
     </form>    
+    {% endif %}
 </div>
 
 
