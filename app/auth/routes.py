@@ -1,7 +1,7 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for
 from app.models import User,System
 from app import db, bcrypt
-from flask_login import login_user,current_user
+from flask_login import login_user
 
 auth = Blueprint('auth', __name__)
 
@@ -44,6 +44,7 @@ auth = Blueprint('auth', __name__)
 
 #     return render_template('index.html', user_data=user_data)
 
+logged_user = None
 
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
