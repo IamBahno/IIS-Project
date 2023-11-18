@@ -90,6 +90,7 @@ def home():
 
     return redirect(url_for('auth.systems'))
 
+# TODO vypisovat realy system, pridat device do systemu, pridat kpi
 @auth.route("/systems",methods=['GET', 'POST'])
 def systems():
     if request.method == 'POST':
@@ -111,11 +112,17 @@ def system_create():
     if request.method == 'POST':
         #add system button
         if 'create-system' in request.form:
+            if not current_user.is_authenticated:
+                flash("Log-in first")
+                print("Log-in first")
             system_name = request.form['system-name']
             system_description = request.form['system-description']
             if(System.query.filter_by(name=system_name).first() != None):
                 print("System with that name already exists")
-            #zjistim lognutyho usera
-            # a vytvorim novej system
-            #redirectnu zpet
+            #zjistit jestli uz neni system toho jmena
+            system = System(name=system_name,description=system_description,system_manager=current_user.id)
+            db.session.add(system)
+            db.session.commit()
+            print("system created")
+            return redirect(url_for('auth.systems'))
     return render_template('system_create.html')
