@@ -1,4 +1,28 @@
 {% extends "layout.html" %}
 {% block content %}
-<p>Systems</p>
+<h1>Systems</h1>
+<div class="container">
+    {% for system in systems %}
+    <div class="item">
+        <div class="system-name">{{ system.name }}</div>
+        <div class="system-id">{{ system.id }}</div>
+        <div class="system-kpis">                 
+            {% for kpis in system.kpis %}
+                <span class="system-kpi-name">{{ kpis.name }}</span>
+                <span class="system-kpi-state">{{ kpis.state }}</span>
+            {% endfor %}
+        </div>
+        <form method="POST">
+            <button type="submit" name="system-button">{{ system.button }}</button>
+        </form>
+        <br>
+    </div>
+    {% endfor %}
+
+    <form method="POST">
+        <button type="submit" name="add-system-button">Create system</button>
+    </form>    
+</div>
+
+
 {% endblock content %}

@@ -55,6 +55,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and bcrypt.check_password_hash(user.hashed_password,password):
             flash('Login successful', 'success')
+            logged_user = username
             return redirect(url_for('auth.home'))
 
                 # Redirect to a profile page or wherever you want
@@ -84,6 +85,14 @@ def register():
 
 @auth.route("/")
 @auth.route("/home")
-@auth.route("/systems")
 def home():
-    return render_template('systems.html')
+
+    return redirect(url_for('auth.systems'))
+
+@auth.route("/systems",methods=['GET', 'POST'])
+def systems():
+    systems = [
+        {"name": "System1", "id": 1, "kpis": [{"name" : "teplota", "state" : "OK"},{"name" : "vlhkost", "state" : "KO"}],"button":"detail"},
+        {"name": "System2", "id" : 2,"kpis": [{"name" : "rychlost", "state" : "KO"}],"button":"pozadat o pristup"},
+    ]
+    return render_template('systems.html',systems=systems)
