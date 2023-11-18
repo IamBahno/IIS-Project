@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+    <form method="POST">
+        <!-- Login Form -->
+        <h2>Create system</h2>
+        <label for="system-name">Name:</label>
+        <input type="text" name="system-name" id="system-name">
+        <label for="system-description">Popis:</label>
+        <input type="text" name="system-description" id="system-description">
+        <button type="submit" name="create-system">Create</button>
+    </form>
+{% endblock content %}

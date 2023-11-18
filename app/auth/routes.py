@@ -1,5 +1,5 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for
-from app.models import User
+from app.models import User,System
 from app import db, bcrypt
 
 auth = Blueprint('auth', __name__)
@@ -91,8 +91,30 @@ def home():
 
 @auth.route("/systems",methods=['GET', 'POST'])
 def systems():
+    if request.method == 'POST':
+        #add system button
+        if 'add-system-button' in request.form:
+            # The 'add-system-button' button was clicked
+            # Handle the logic for creating a system here
+            return redirect(url_for('auth.system_create'))
+
+
     systems = [
         {"name": "System1", "id": 1, "kpis": [{"name" : "teplota", "state" : "OK"},{"name" : "vlhkost", "state" : "KO"}],"button":"detail"},
         {"name": "System2", "id" : 2,"kpis": [{"name" : "rychlost", "state" : "KO"}],"button":"pozadat o pristup"},
     ]
     return render_template('systems.html',systems=systems)
+
+@auth.route("/systems/create",methods=['GET', 'POST'])
+def system_create():
+    if request.method == 'POST':
+        #add system button
+        if 'create-system' in request.form:
+            system_name = request.form['system-name']
+            system_description = request.form['system-description']
+            if(System.query.filter_by(name=system_name).first() != None):
+                print("System with that name already exists")
+            #zjistim lognutyho usera
+            # a vytvorim novej system
+            #redirectnu zpet
+    return render_template('system_create.html')

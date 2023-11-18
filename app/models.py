@@ -2,7 +2,6 @@ from app import db
 from datetime import datetime
 from sqlalchemy import ForeignKeyConstraint
 
-#TODO unique attributes and nullabel = False
 
 user_system = db.Table('user_system',
                     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
