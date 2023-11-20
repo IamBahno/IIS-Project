@@ -2,7 +2,7 @@ from app import db, login_manager
 from datetime import datetime
 from sqlalchemy import ForeignKeyConstraint
 from flask_login import UserMixin
-
+from sqlalchemy import event
 
 user_system = db.Table('user_system',
                     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -96,6 +96,7 @@ class Parameter(db.Model):
     __tablename__ = "parameter"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable = False)
+    unit = db.Column(db.String(50), nullable = False)
 
     # device type the parameter is for
     # device_type_id = db.Column(db.Integer,db.ForeignKey("device_type.id"))
@@ -138,5 +139,4 @@ class Value(db.Model):
 
     # setter of the value
     setter = db.Column(db.Integer,db.ForeignKey('user.id'))
-
 
