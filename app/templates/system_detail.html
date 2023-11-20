@@ -4,7 +4,11 @@
     <p>{{ system.description }}</p>
     <!-- TODO: zadosti o system -->
 
-    <!-- TODO: devices -->
+    <!--  TODO parameter values -->
+    {% for device in devices %}
+        {{device.name}} {{device.description}}
+        <br>
+    {% endfor %}
 
     <form method="POST">
         <input type="hidden" name="system_id" value="{{ system.id }}">

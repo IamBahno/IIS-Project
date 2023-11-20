@@ -6,9 +6,19 @@
         <label for="device-description">Description:</label>
         <input type="text" name="device-description" id="device-description">
         
-        <!-- device type vybrat z vyberu -->
-
+        <select id="device-type" name="device-type">
+            {% for device_type in device_types %}
+                <option value={{device_type.id}}>
+                    {{device_type.name}}:
+    
+                    {% for parameter in parameters[device_type.name] %}
+                        {{ parameter }} ;
+                    {% endfor %}
+                </option>
+            {% endfor %}            
+        </select>
         <br>
-        <button type="submit" name="add-device">Add device</button>
+        <input type="hidden" name="system_id" value="{{ system_id }}">
+        <button type="submit" name="create-device">Add device</button>
     </form>
 {% endblock content %}

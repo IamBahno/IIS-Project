@@ -79,10 +79,7 @@ class DeviceType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable = False)
 
-    #devicetype is strong entity for parameter
-    # parameters = db.relationship('Parameter',backref="device_type_back_ref_1",cascade='all, delete')
     parameters = db.relationship('Parameter',secondary="devicetype_parameter",backref='device_types')
-    # used_systems = db.relationship('System',secondary=user_system,backref='users')
 
 
     #devices that are this device type
@@ -98,8 +95,6 @@ class Parameter(db.Model):
     name = db.Column(db.String(50), nullable = False)
     unit = db.Column(db.String(50), nullable = False)
 
-    # device type the parameter is for
-    # device_type_id = db.Column(db.Integer,db.ForeignKey("device_type.id"))
 
     # 1:N parameter value
     values = db.relationship('Value',backref="parameter_back_ref")

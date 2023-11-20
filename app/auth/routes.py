@@ -1,12 +1,11 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for
-from app.models import User,System, Parameter
+from app.models import User,System, Parameter, DeviceType, Device,Value
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 
 auth = Blueprint('auth', __name__)
 
 
-logged_user = None
 
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
@@ -101,12 +100,28 @@ def system_detail():
         if "add-device" in request.form:
             return redirect(url_for('auth.device_create',system_id=request.form["system_id"]),code=307)
         system=System.query.filter_by(id = int(request.form["system_id"])).first()
-        return render_template('system_detail.html',system=system)
+        devices = Device.query.filter_by(system=system.id).all()
+        return render_template('system_detail.html',system=system,devices=devices)
     return "<p>ahoj</p>"
 
 @auth.route("/device/create",methods=['GET', 'POST'])
 def device_create():
-    return render_template('device_create.html')
+    if "create-device" in request.form:
+        print(request.form)
+        # device_type = DeviceType.query.filter_by(id=request.form.get("device-type")).first()
+        device = Device(name = "device-name",description="device-description",system=request.form["system_id"],device_manager=current_user.id,device_type_id=request.form.get("device-type"))
+        db.session.add(device)
+        db.session.commit()
+        print("bro")
+        return redirect(url_for('auth.system_detail',system_id=request.form["system_id"]),code=307)
+    device_types = DeviceType.query.all()
+    parameters_of_device_types = {}
+    for device_type in device_types:
+        parameter_names = []
+        for parameter in device_type.parameters:
+            parameter_names.append(parameter.name)
+        parameters_of_device_types[device_type.name] = parameter_names
+    return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=request.form["system_id"])
 
 @auth.route("/systems/system_request",methods=['GET', 'POST'])
 def system_request():
