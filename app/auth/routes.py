@@ -72,7 +72,6 @@ def logout():
     return redirect(url_for('auth.home'))
 
 #TODO unique username constaint
-#TODO po registraci prihlasit
 @auth.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -92,6 +91,9 @@ def register():
         db.session.commit()
 
         flash('User registered successfully', 'success')
+
+        login_user(user)
+
         return redirect(url_for('auth.home'))
     return render_template('register.html', title='Register')
 
