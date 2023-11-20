@@ -71,6 +71,7 @@ def logout():
     logout_user()
     return redirect(url_for('auth.home'))
 
+# unique username constaint
 @auth.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -114,6 +115,10 @@ def systems():
         {"name": "System1", "id": 1, "kpis": [{"name" : "teplota", "state" : "OK"},{"name" : "vlhkost", "state" : "KO"}],"button":"detail"},
         {"name": "System2", "id" : 2,"kpis": [{"name" : "rychlost", "state" : "KO"}],"button":"pozadat o pristup"},
     ]
+    systems_in_db =  System.query.all()
+    # print(systems_in_db)
+    for i in systems_in_db:
+        systems.append({"name": i.name, "id": i.id})
     return render_template('systems.html',systems=systems)
 
 @auth.route("/systems/create",methods=['GET', 'POST'])

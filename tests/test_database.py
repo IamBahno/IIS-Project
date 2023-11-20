@@ -236,15 +236,19 @@ def test_parameter_and_relationships(client):
     db.session.add(device_type)
 
     # Create a Parameter and associate it with the DeviceType
-    parameter = Parameter(name="Test Parameter", device_type_id=device_type)
-    device_type.parameters.append(parameter)
+    # parameter = Parameter(name="Test Parameter", device_type_id=device_type)
+    parameter = Parameter(name="Test Parameter")
     db.session.add(parameter)
+    db.session.commit()
+
+    device_type.parameters.append(parameter)
+    db.session.add(device_type)
     db.session.commit()
 
     # Query the Parameter and check if it is associated with the DeviceType
     retrieved_parameter = Parameter.query.filter_by(name="Test Parameter").first()
     assert retrieved_parameter is not None
-    assert retrieved_parameter.device_type_id == device_type.id
+    assert retrieved_parameter.device_types[0] == device_type
 
 
 def test_create_device_type_with_device_and_values(client):
@@ -252,7 +256,13 @@ def test_create_device_type_with_device_and_values(client):
     device_type = DeviceType(name="Test Device Type")
 
     # Create a Parameter associated with the DeviceType
-    parameter = Parameter(name="Test Parameter", device_type_id=device_type)
+    # parameter = Parameter(name="Test Parameter", device_type_id=device_type)
+    parameter = Parameter(name="Test Parameter")
+    db.session.add(device_type)
+    db.session.add(parameter)
+
+    device_type.parameters.append(parameter)
+    db.session.commit()
 
     # Create a Device of the specified DeviceType
     device = Device(name="Test Device", device_type_id=device_type)
@@ -298,9 +308,12 @@ def test_user_create_system_with_devices_and_kpi(client):
     db.session.commit()
 
     # Create a parameter for the device type
-    parameter = Parameter(name="Test Parameter", device_type_id=device_type.id)
-    db.session.add(device_type)
+    # parameter = Parameter(name="Test Parameter", device_type_id=device_type.id)
+    parameter = Parameter(name="Test Parameter")
     db.session.add(parameter)
+    db.session.commit()
+
+    device_type.parameters.append(parameter)
     db.session.commit()
 
     # Create a system

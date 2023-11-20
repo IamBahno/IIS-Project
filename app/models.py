@@ -9,6 +9,11 @@ user_system = db.Table('user_system',
                     db.Column('system_id', db.Integer, db.ForeignKey('system.id'))
                     )
 
+devicetype_parameter = db.Table('devicetype_parameter',
+                    db.Column('device_type_id', db.Integer, db.ForeignKey('device_type.id')),
+                    db.Column('parameter_id', db.Integer, db.ForeignKey('parameter.id'))
+                    )
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -75,7 +80,10 @@ class DeviceType(db.Model):
     name = db.Column(db.String(50), unique=True, nullable = False)
 
     #devicetype is strong entity for parameter
-    parameters = db.relationship('Parameter',backref="device_type_back_ref_1",cascade='all, delete')
+    # parameters = db.relationship('Parameter',backref="device_type_back_ref_1",cascade='all, delete')
+    parameters = db.relationship('Parameter',secondary="devicetype_parameter",backref='device_types')
+    # used_systems = db.relationship('System',secondary=user_system,backref='users')
+
 
     #devices that are this device type
     devices = db.relationship('Device',backref="device_type_back_ref_2",cascade='all, delete')
@@ -90,7 +98,8 @@ class Parameter(db.Model):
     name = db.Column(db.String(50), nullable = False)
 
     # device type the parameter is for
-    device_type_id = db.Column(db.Integer,db.ForeignKey("device_type.id"))
+    # device_type_id = db.Column(db.Integer,db.ForeignKey("device_type.id"))
+
     # 1:N parameter value
     values = db.relationship('Value',backref="parameter_back_ref")
 
