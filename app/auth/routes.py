@@ -71,7 +71,8 @@ def logout():
     logout_user()
     return redirect(url_for('auth.home'))
 
-# unique username constaint
+#TODO unique username constaint
+#TODO po registraci prihlasit
 @auth.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -101,6 +102,7 @@ def home():
     return redirect(url_for('auth.systems'))
 
 # TODO vypisovat realy system, pridat device do systemu, pridat kpi
+#TODO request detail
 @auth.route("/systems",methods=['GET', 'POST'])
 def systems():
     if request.method == 'POST':
@@ -109,6 +111,11 @@ def systems():
             # The 'add-system-button' button was clicked
             # Handle the logic for creating a system here
             return redirect(url_for('auth.system_create'))
+        if request.method == 'POST' and 'system-button-detail' in request.form:
+            return redirect(url_for('auth.system_detail'))
+        elif request.method == 'POST' and "system-button-request" in request.form:
+            return redirect(url_for('auth.system_request'))
+                
 
 
     systems = [
@@ -118,8 +125,19 @@ def systems():
     systems_in_db =  System.query.all()
     # print(systems_in_db)
     for i in systems_in_db:
-        systems.append({"name": i.name, "id": i.id})
+        system_privilages = False
+        if(current_user.is_authenticated and current_user.id == i.system_manager):
+            system_privilages = True
+        systems.append({"name": i.name, "id": i.id,"button": "detail" if system_privilages else "pozadat o pristup"})
     return render_template('systems.html',systems=systems)
+
+@auth.route("/systems/detail",methods=['GET', 'POST'])
+def system_detail():
+    return render_template('')
+
+@auth.route("/systems/system_request",methods=['GET', 'POST'])
+def system_request():
+    return render_template('')
 
 @auth.route("/systems/create",methods=['GET', 'POST'])
 def system_create():
