@@ -2,7 +2,7 @@ from app import db, login_manager
 from datetime import datetime
 from sqlalchemy import ForeignKeyConstraint
 from flask_login import UserMixin
-from sqlalchemy import event
+from sqlalchemy import event, ARRAY
 
 user_system = db.Table('user_system',
                     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -48,6 +48,8 @@ class System(db.Model):
 
     # owner/ manager of system
     system_manager = db.Column(db.Integer,db.ForeignKey('user.id'))
+
+    pending_requests_users_id = db.Column(ARRAY(db.Integer))
 
     # 1:N system devices
     devices = db.relationship('Device',backref="system_back_ref",cascade='all, delete')
