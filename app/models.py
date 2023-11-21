@@ -14,6 +14,11 @@ devicetype_parameter = db.Table('devicetype_parameter',
                     db.Column('parameter_id', db.Integer, db.ForeignKey('parameter.id'))
                     )
 
+request_system = db.Table('request_system',
+                    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+                    db.Column('system_id', db.Integer, db.ForeignKey('system.id'))
+                    )
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -40,6 +45,10 @@ class User(db.Model, UserMixin):
     # 1:N defined kpis
     defined_kpi = db.relationship('Kpi',backref="user")
 
+    # N:M request system use
+    request_system = db.relationship('System',secondary=request_system,backref='users_requesting')
+
+
 class System(db.Model):
     __tablename__ = "system"
     id = db.Column(db.Integer, primary_key=True)
@@ -49,7 +58,6 @@ class System(db.Model):
     # owner/ manager of system
     system_manager = db.Column(db.Integer,db.ForeignKey('user.id'))
 
-    pending_requests_users_id = db.Column(ARRAY(db.Integer))
 
     # 1:N system devices
     devices = db.relationship('Device',backref="system_back_ref",cascade='all, delete')

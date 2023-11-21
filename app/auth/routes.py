@@ -47,7 +47,7 @@ def register():
 
 
         # Create a new User record and add it to the database
-        user = User(username=username,first_name=first_name,last_name=last_name,role=role,hashed_password = bcrypt.generate_password_hash(password))
+        user = User(username=username,first_name=first_name,last_name=last_name,role=role,hashed_password = bcrypt.generate_password_hash(password).decode('utf-8'))
         db.session.add(user)
         db.session.commit()
 
@@ -77,7 +77,10 @@ def systems():
         if request.method == 'POST' and 'system-button-detail' in request.form:
             return redirect(url_for('auth.system_detail',system_id=request.form["system_id"]),code=307)
         elif request.method == 'POST' and "system-button-request" in request.form:
-            return redirect(url_for('auth.system_request'))
+            # system = System.query.filter_by(id=request.form["system_id"])
+            current_user.request_system.append(System.query.filter_by(id=request.form["system_id"]).first())
+            db.session.add(current_user)
+            db.session.commit()
         elif request.method == 'POST' and "system-button-delete" in request.form:
             system = System.query.filter_by(id=request.form["system_id"]).first()
             db.session.delete(system)
@@ -94,7 +97,14 @@ def systems():
         system_privilages = False
         if(current_user.is_authenticated and current_user.id == i.system_manager):
             system_privilages = True
-        systems.append({"name": i.name, "id": i.id,"button": "detail" if system_privilages else "pozadat o pristup","owner": True if system_privilages and i.system_manager == current_user.id else False})
+        if system_privilages:
+            button = "detail"
+        elif current_user in i.users_requesting:
+            button = "request pending"
+        else:
+            button = "request system use"
+        systems.append({"name": i.name, "id": i.id,
+                        "button": button, "owner": True if system_privilages and i.system_manager == current_user.id else False})
     return render_template('systems.html',systems=systems)
 
 
@@ -125,9 +135,6 @@ def device_create():
         parameters_of_device_types[device_type.name] = parameter_names
     return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=request.form["system_id"])
 
-@auth.route("/systems/system_request",methods=['GET', 'POST'])
-def system_request():
-    return render_template('')
 
 @auth.route("/systems/create",methods=['GET', 'POST'])
 def system_create():
