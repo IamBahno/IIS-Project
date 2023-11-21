@@ -4,6 +4,23 @@
     <p>{{ system.description }}</p>
     <!-- TODO: zadosti o system -->
 
+    {% for request in system.users_requesting %}
+        "user: "{{request.username}}" id:"{{request.id}} 
+        <form method="POST">
+            <input type="hidden" name="system_id" value="{{ system.id }}">
+            <input type="hidden" name="request_user_id" value="{{ request.id }}">
+            <button type="submit" name="request-accept">Accept</button>
+        </form>
+
+        <form method="POST">
+            <input type="hidden" name="system_id" value="{{ system.id }}">
+            <input type="hidden" name="request_user_id" value="{{ request.id }}">
+            <button type="submit" name="request-decline">Decline</button>
+        </form>
+        <br>
+
+    {% endfor %}
+
     <!--  TODO parameter values -->
     {% for device in devices %}
         {{device.name}} {{device.description}}

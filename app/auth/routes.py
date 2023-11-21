@@ -1,5 +1,5 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for
-from app.models import User,System, Parameter, DeviceType, Device,Value
+from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -92,10 +92,9 @@ def systems():
         {"name": "System2", "id" : 2,"kpis": [{"name" : "rychlost", "state" : "KO"}],"button":"pozadat o pristup"},
     ]
     systems_in_db =  System.query.all()
-    # print(systems_in_db)
     for i in systems_in_db:
         system_privilages = False
-        if(current_user.is_authenticated and current_user.id == i.system_manager):
+        if(current_user.is_authenticated and (current_user.id == i.system_manager or i in current_user.used_systems)):
             system_privilages = True
         if system_privilages:
             button = "detail"
@@ -114,6 +113,19 @@ def system_detail():
     if "system_id" in request.form:
         if "add-device" in request.form:
             return redirect(url_for('auth.device_create',system_id=request.form["system_id"]),code=307)
+        elif "request-accept" in request.form:
+            delete_system_request(user_id = int(request.form["request_user_id"]), system_id = int(request.form["system_id"]),db = db)
+
+            user = User.query.filter_by(id=request.form["request_user_id"]).first()
+            system=System.query.filter_by(id = request.form["system_id"]).first()
+            system.users.append(user)
+            db.session.add(system)
+            db.session.add(user)
+            db.session.commit()
+
+        elif "request-decline" in request.form:
+            delete_system_request(user_id = int(request.form["request_user_id"]), system_id = int(request.form["system_id"]),db = db)
+
         system=System.query.filter_by(id = int(request.form["system_id"])).first()
         devices = Device.query.filter_by(system=system.id).all()
         return render_template('system_detail.html',system=system,devices=devices)

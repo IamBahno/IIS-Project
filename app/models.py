@@ -145,3 +145,12 @@ class Value(db.Model):
     # setter of the value
     setter = db.Column(db.Integer,db.ForeignKey('user.id'))
 
+def delete_system_request(user_id = None, system_id = None,db = None):
+    if None in [user_id,system_id,db]:
+        return
+    user = User.query.filter_by(id=user_id).first()
+    system=System.query.filter_by(id = system_id).first()
+    system.users_requesting.remove(user)
+    db.session.add(system)
+    db.session.add(user)
+    db.session.commit()
