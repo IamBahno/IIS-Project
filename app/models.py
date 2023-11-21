@@ -50,7 +50,7 @@ class System(db.Model):
     system_manager = db.Column(db.Integer,db.ForeignKey('user.id'))
 
     # 1:N system devices
-    devices = db.relationship('Device',backref="system_back_ref")
+    devices = db.relationship('Device',backref="system_back_ref",cascade='all, delete')
 
     # 1:N system kpi
     kpis = db.relationship('Kpi',backref="system_back_ref_2",cascade='all, delete')

@@ -18,7 +18,13 @@
             {% if system.button == "detail" %}
                 <button type="submit" name="system-button-detail" >{{ system.button }} </button>
             {% else %}
-            <button type="submit" name="system-button-request" >{{ system.button }} </button>
+                <button type="submit" name="system-button-request" >{{ system.button }} </button>
+            {% endif %}
+        </form>
+        <form method="POST">
+            {% if system.owner == True %}
+                <button type="submit" name="system-button-delete" >DELETE</button>
+                <input type="hidden" name="system_id" value="{{ system.id }}">
             {% endif %}
         </form>
         {% endif %}

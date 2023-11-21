@@ -78,8 +78,11 @@ def systems():
             return redirect(url_for('auth.system_detail',system_id=request.form["system_id"]),code=307)
         elif request.method == 'POST' and "system-button-request" in request.form:
             return redirect(url_for('auth.system_request'))
+        elif request.method == 'POST' and "system-button-delete" in request.form:
+            system = System.query.filter_by(id=request.form["system_id"]).first()
+            db.session.delete(system)
+            db.session.commit()
                 
-
 
     systems = [
         {"name": "System1", "id": 1, "kpis": [{"name" : "teplota", "state" : "OK"},{"name" : "vlhkost", "state" : "KO"}],"button":"detail"},
@@ -91,8 +94,10 @@ def systems():
         system_privilages = False
         if(current_user.is_authenticated and current_user.id == i.system_manager):
             system_privilages = True
-        systems.append({"name": i.name, "id": i.id,"button": "detail" if system_privilages else "pozadat o pristup"})
+        systems.append({"name": i.name, "id": i.id,"button": "detail" if system_privilages else "pozadat o pristup","owner": True if system_privilages and i.system_manager == current_user.id else False})
     return render_template('systems.html',systems=systems)
+
+
 
 @auth.route("/systems/detail",methods=['GET', 'POST'])
 def system_detail():
@@ -107,12 +112,9 @@ def system_detail():
 @auth.route("/device/create",methods=['GET', 'POST'])
 def device_create():
     if "create-device" in request.form:
-        print(request.form)
-        # device_type = DeviceType.query.filter_by(id=request.form.get("device-type")).first()
-        device = Device(name = "device-name",description="device-description",system=request.form["system_id"],device_manager=current_user.id,device_type_id=request.form.get("device-type"))
+        device = Device(name = request.form["device-name"],description=request.form["device-description"],system=request.form["system_id"],device_manager=current_user.id,device_type_id=request.form.get("device-type"))
         db.session.add(device)
         db.session.commit()
-        print("bro")
         return redirect(url_for('auth.system_detail',system_id=request.form["system_id"]),code=307)
     device_types = DeviceType.query.all()
     parameters_of_device_types = {}
