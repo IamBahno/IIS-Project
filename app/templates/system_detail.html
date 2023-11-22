@@ -28,9 +28,8 @@
     <!--  TODO parameter values -->
     {% for device in devices %}
         {{device.name}} {{device.description}} 
-            <form method="GET">
-                <input type="hidden" name="device_id" value="{{ device.id }}">
-                <input type="hidden" name="user_id" value="{{ user.id }}">
+            <form method="POST" action="/systems/{{system.id}}/{{device.id}}">
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
                 <button type="submit" name="device-detail">Detail</button>
             </form>
  

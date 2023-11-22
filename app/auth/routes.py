@@ -138,9 +138,11 @@ def system_detail(system_id):
     return render_template('system_detail.html',system=system,devices=devices,user=current_user)
 
 
-auth.route("/systems/device/detail",methods=['GET', 'POST'])
-def device_detail():
-    return render_template('device_detail.html')
+@auth.route("/systems/<system_id>/<device_id>",methods=['GET', 'POST'])
+def device_detail(system_id, device_id):
+    print(system_id)
+    return render_template('device_detail.html', device_id=int(device_id), system_id=int(system_id))
+    
 @auth.route("/systems/<system_id>/create",methods=['GET', 'POST'])
 def device_create(system_id):
     if "create-device" in request.values:
