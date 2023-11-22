@@ -1,12 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
-    <form method="POST">
-        <label for="device-name">Name:</label>
-        <input type="text" name="device-name" id="device-name">
-        <label for="device-description">Description:</label>
-        <input type="text" name="device-description" id="device-description">
-        
-        <select id="device-type" name="device-type">
+<form method="POST" class="container-sm" style="max-width:768px">
+    <h2>Create device</h2>
+    <input type="hidden" name="system_id" value="{{ system_id }}">
+    <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="device-name" placeholder="" name="device-name">
+        <label for="device-name">Name</label>
+    </div>
+    <div class="form-floating mb-3">
+        <textarea type="text" class="form-control" id="device-description" placeholder="" name="device-description" style="min-height:150px"></textarea>
+        <label for="device-description">Description</label>
+    </div>
+    <div class="form-floating mb-3">
+        <select class="form-select" id="device-type" name="device-type">
             {% for device_type in device_types %}
                 <option value={{device_type.id}}>
                     {{device_type.name}}:
@@ -15,10 +21,12 @@
                         {{ parameter }} ;
                     {% endfor %}
                 </option>
-            {% endfor %}            
+            {% endfor %}   
         </select>
-        <br>
-        <input type="hidden" name="system_id" value="{{ system_id }}">
-        <button type="submit" name="create-device">Add device</button>
-    </form>
+        <label for="device-type">Device type</label>
+    </div>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" name="create-device" class="btn btn-primary">Create</button>
+    </div>
+</form>
 {% endblock content %}
