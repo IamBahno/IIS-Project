@@ -1,9 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
+<div class="container">
+
     <h1>system: {{ system.name }}</h1>
     <p>{{ system.description }}</p>
     <!-- TODO: zadosti o system -->
 
+<<<<<<< HEAD
     {% if system.system_manager == user.id or user.role == "admin" %}
         {% for request in system.users_requesting %}
             "user: "{{request.username}}" id:"{{request.id}} 
@@ -12,6 +15,14 @@
                 <input type="hidden" name="request_user_id" value="{{ request.id }}">
                 <button type="submit" name="request-accept">Accept</button>
             </form>
+=======
+    {% for request in system.users_requesting %}
+        "user: "{{request.username}}" id:"{{request.id}} 
+        <form method="POST">
+            <input type="hidden" name="request_user_id" value="{{ request.id }}">
+            <button type="submit" name="request-accept">Accept</button>
+        </form>
+>>>>>>> d1907aeba3dac15fc350be4f8a115ab90c9bdffb
 
             <form method="POST">
                 <input type="hidden" name="system_id" value="{{ system.id }}">
@@ -35,6 +46,7 @@
         <br>
     {% endfor %}
 
+<<<<<<< HEAD
     {% if system.system_manager == user.id or user.role == "admin" %}
 
         <form method="POST">
@@ -43,4 +55,11 @@
         </form>
     {% endif %}
     
+=======
+    <form method="POST" class="d-grid gap-2 d-md-flex justify-content-md-end" action="/systems/{{system.id}}/create">
+        <input type="hidden" name="system_id" value="{{ system.id }}">
+        <button class="btn btn-secondary" type="submit" name="add-device">Add device</button>
+    </form>
+</div>
+>>>>>>> d1907aeba3dac15fc350be4f8a115ab90c9bdffb
 {% endblock content %}

@@ -23,7 +23,7 @@
                         </table>
                         {% if current_user.is_authenticated %}
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <form class="d-grid gap-2 d-md-flex justify-content-md-end" method="POST">
+                            <form class="d-grid gap-2 d-md-flex justify-content-md-end" method="POST" action="/systems/{{ system.id }}">
                                 <input type="hidden" name="system_id" value="{{ system.id }}">
                                 {% if system.button == "detail" %}
                                     <button class="btn btn-primary" type="submit" name="system-button-detail" >{{ system.button }} </button>
