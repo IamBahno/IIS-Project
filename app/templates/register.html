@@ -1,25 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Form</title>
-</head>
-<body>
-<form method="POST">
-    <!-- Registration Form -->
+{% extends "layout.html" %}
+{% block content %}
+<form method="POST" class="container-sm" style="max-width:768px">
     <h2>Registration</h2>
-    <label for="username">Username:</label>
-    <input type="text" name="username" id="username">
-    <label for="password">Password:</label>
-    <input type="password" name="password" id="password">
-    <label for="first_name">First name:</label>
-    <input type="first_name" name="first_name" id="first_name">
-    <label for="last_name">Last name:</label>
-    <input type="last_name" name="last_name" id="last_name">
-    <label for="role">Role:</label>
-    <input type="role" name="role" id="role">
-    <button type="submit" name="register">Register</button>
+    <div class="row">
+        <div class="col">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="username" placeholder="" name="username">
+                <label for="username">Username</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="first_name" placeholder="" name="first_name">
+                <label for="first_name">First name</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="last_name" placeholder="" name="last_name">
+                <label for="last_name">Last name</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-floating mb-3">
+                <select class="form-select" type="role" id="role" name="role">
+                    <option value="user" selected>User</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <label for="role">Role</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" id="password" placeholder="" name="password">
+                <label for="password">Password</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </div>
+        </div>
+    </div>
 </form>
-</body>
-</html>
+{% endblock %}
