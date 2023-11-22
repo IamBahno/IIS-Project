@@ -1,28 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <link rel="stylesheet" href="../static/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
-    <header class="site-header">
-        <ul>
-            {% if not current_user.is_authenticated %}
-                <li><a href="/register">Register</a></li>
-                <li><a href="/login">Login</a></li>
-            {% endif %}
-            {% if current_user.is_authenticated %}
-                <li class="right"><a href="/logout">{{ "Logout (" + current_user.username + ")" }}</a></li>
-            {% endif %}
-        </ul>
+    <nav class="navbar navbar-expand-lg sticky-top bg-dark">
+        <div class="container-fluid">
+            <button class="navbar-toggler ml-auto mr-3 order-lg-last" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarToggler">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarToggler">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/systems">Systems</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if not current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="/login" class="nav-link">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/register" class="nav-link">Register</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="/logout" class="nav-link">Logout ({{ current_user.username }})</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
         <!-- ukazat jmeno uzivatele a roli asi-->
         <!-- jmeno aktualni zalozka -->
-    </header>
+    </nav>
     <main role="main" class="container clear">
         {% block content %}{% endblock %}
     </main>
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
 </body>
 </html>
