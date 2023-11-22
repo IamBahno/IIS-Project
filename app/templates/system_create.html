@@ -1,12 +1,17 @@
 {% extends "layout.html" %}
 {% block content %}
-    <form method="POST">
-        <!-- Login Form -->
-        <h2>Create system</h2>
-        <label for="system-name">Name:</label>
-        <input type="text" name="system-name" id="system-name">
-        <label for="system-description">Popis:</label>
-        <input type="text" name="system-description" id="system-description">
-        <button type="submit" name="create-system">Create</button>
-    </form>
+<form method="POST" class="container-sm" style="max-width:768px">
+    <h2>Create system</h2>
+    <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="system-name" placeholder="" name="system-name">
+        <label for="system-name">Name</label>
+    </div>
+    <div class="form-floating mb-3">
+        <textarea type="text" class="form-control" id="system-description" placeholder="" name="system-description" style="min-height:150px"></textarea>
+        <label for="system-description">Description</label>
+    </div>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" name="create-system" class="btn btn-primary">Create</button>
+    </div>
+</form>
 {% endblock content %}
