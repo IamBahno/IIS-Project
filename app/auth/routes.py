@@ -113,27 +113,27 @@ def systems():
 
 
 
-@auth.route("/systems/detail",methods=['GET', 'POST'])
+@auth.route("/systems/<system_id>",methods=['GET', 'POST'])
 def system_detail(system_id):
     if request.method == "GET" and "device-detail" in request.values:
         return redirect(url_for('auth.device_detail',user=request.values["user_id"],device=request.values["device_id"]))
     
     if "add-device" in request.values:
-        return redirect(url_for('auth.device_create',system_id=request.values["system_id"]),code=307)
+        return redirect(url_for('auth.device_create',system_id=system_id),code=307)
     elif "request-accept" in request.values:
-        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(request.values["system_id"]),db = db)
+        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(system_id),db = db)
 
-    user = User.query.filter_by(id=request.values["request_user_id"]).first()
-    system=System.query.filter_by(id=int(system_id)).first()
-    system.users.append(user)
-    db.session.add(system)
-    db.session.add(user)
-    db.session.commit()
+        user = User.query.filter_by(id=request.values["request_user_id"]).first()
+        system=System.query.filter_by(id=int(system_id)).first()
+        system.users.append(user)
+        db.session.add(system)
+        db.session.add(user)
+        db.session.commit()
 
     elif "request-decline" in request.values:
-        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(request.values["system_id"]),db = db)
+        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(system_id),db = db)
 
-    system=System.query.filter_by(id = int(request.values["system_id"])).first()
+    system=System.query.filter_by(id = int(system_id)).first()
     devices = Device.query.filter_by(system=system.id).all()
     return render_template('system_detail.html',system=system,devices=devices)
 
