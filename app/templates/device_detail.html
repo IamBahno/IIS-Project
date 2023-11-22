@@ -1,4 +1,17 @@
 {% extends "layout.html" %}
 {% block content %}
-
+    {%  for value,parameter in zip(values,parameters) %}
+        VALUE {{value.value}} {{parameter.unit}}
+            {% if user.role == "broker" or user.role == "admin" %}
+                <form method="POST">
+                    <label for="value">Value</label>
+                    <input type="input" name="value" pattern="[0-9]+(\.[0-9]+)?">
+                    <label >{{parameter.unit}}</label>
+                    <input type="datetime-local" id="time" name="time" value="{{ default_datetime }}">
+                    <input type="hidden" name="parameter_id" value={{parameter.id}}>
+                    <button type="submit" name="add-value">Add</button>
+                </form>
+            {% endif %}
+        <br>
+    {% endfor %}
 {% endblock content %}

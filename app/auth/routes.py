@@ -2,6 +2,7 @@ from flask import render_template, request, Blueprint, flash, redirect, url_for
 from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
+from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
@@ -140,8 +141,21 @@ def system_detail(system_id):
 
 @auth.route("/systems/<system_id>/<device_id>",methods=['GET', 'POST'])
 def device_detail(system_id, device_id):
-    print(system_id)
-    return render_template('device_detail.html', device_id=int(device_id), system_id=int(system_id))
+    if "add-value" in request.values:
+        value_value = request.values["value"]
+        try:
+            value_value = int(value_value)
+        except:
+            value_value = float(value_value)
+        value = Value(value=value_value,timestamp=request.values["time"],setter=current_user.id,device=device_id,parameter=request.values["parameter_id"])
+        db.session.add(value)
+        db.session.commit()
+    device = Device.query.filter_by(id=device_id).first()
+    device_type = DeviceType.query.filter_by(id=device.device_type_id).first()
+    parameters = device_type.parameters
+    values = [Value.query.filter_by(parameter=parameter.id,device=device.id).order_by(Value.timestamp.desc()).first() for parameter in parameters]
+
+    return render_template('device_detail.html', device_id=int(device_id), system_id=int(system_id),user=current_user,values=values,parameters=parameters,default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip)
     
 @auth.route("/systems/<system_id>/create",methods=['GET', 'POST'])
 def device_create(system_id):
