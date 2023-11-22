@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
+<div class="container">
+
     <h1>system: {{ system.name }}</h1>
     <p>{{ system.description }}</p>
     <!-- TODO: zadosti o system -->
@@ -7,7 +9,6 @@
     {% for request in system.users_requesting %}
         "user: "{{request.username}}" id:"{{request.id}} 
         <form method="POST">
-            <input type="hidden" name="system_id" value="{{ system.id }}">
             <input type="hidden" name="request_user_id" value="{{ request.id }}">
             <button type="submit" name="request-accept">Accept</button>
         </form>
@@ -27,8 +28,9 @@
         <br>
     {% endfor %}
 
-    <form method="POST">
+    <form method="POST" class="d-grid gap-2 d-md-flex justify-content-md-end" action="/systems/{{system.id}}/create">
         <input type="hidden" name="system_id" value="{{ system.id }}">
-        <button type="submit" name="add-device">Add device</button>
+        <button class="btn btn-secondary" type="submit" name="add-device">Add device</button>
     </form>
+</div>
 {% endblock content %}

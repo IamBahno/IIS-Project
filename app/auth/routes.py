@@ -49,7 +49,12 @@ def register():
         # Create a new User record and add it to the database
         user = User(username=username,first_name=first_name,last_name=last_name,role=role,hashed_password = bcrypt.generate_password_hash(password).decode('utf-8'))
         db.session.add(user)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except Exception:
+            flash('User already exists', 'error')
+            return '', 400
 
         flash('User registered successfully', 'success')
 
@@ -108,36 +113,39 @@ def systems():
 
 
 
-@auth.route("/systems/detail",methods=['GET', 'POST'])
-def system_detail():
-    if "system_id" in request.values:
-        if "add-device" in request.values:
-            return redirect(url_for('auth.device_create',system_id=request.values["system_id"]),code=307)
-        elif "request-accept" in request.values:
-            delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(request.values["system_id"]),db = db)
+@auth.route("/systems/<system_id>",methods=['GET', 'POST'])
+def system_detail(system_id):
+    print("test")
+    print(system_id)
+    if "add-device" in request.values:
+        return redirect(url_for('auth.device_create',system_id=system_id),code=307)
+    elif "request-accept" in request.values:
+        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(system_id),db = db)
 
-            user = User.query.filter_by(id=request.values["request_user_id"]).first()
-            system=System.query.filter_by(id = request.values["system_id"]).first()
-            system.users.append(user)
-            db.session.add(system)
-            db.session.add(user)
-            db.session.commit()
+        user = User.query.filter_by(id=request.values["request_user_id"]).first()
+        system=System.query.filter_by(id=int(system_id)).first()
+        system.users.append(user)
+        db.session.add(system)
+        db.session.add(user)
+        db.session.commit()
 
-        elif "request-decline" in request.values:
-            delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(request.values["system_id"]),db = db)
+    elif "request-decline" in request.values:
+        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(request.values["system_id"]),db = db)
 
-        system=System.query.filter_by(id = int(request.values["system_id"])).first()
-        devices = Device.query.filter_by(system=system.id).all()
-        return render_template('system_detail.html',system=system,devices=devices)
-    return "<p>ahoj</p>"
+    system=System.query.filter_by(id = int(system_id)).first()
 
-@auth.route("/device/create",methods=['GET', 'POST'])
-def device_create():
+    #TODO: check if system found
+
+    devices = Device.query.filter_by(system=system.id).all()
+    return render_template('system_detail.html',system=system,devices=devices)
+
+@auth.route("/systems/<system_id>/create",methods=['GET', 'POST'])
+def device_create(system_id):
     if "create-device" in request.values:
-        device = Device(name = request.values["device-name"],description=request.values["device-description"],system=request.values["system_id"],device_manager=current_user.id,device_type_id=request.values.get("device-type"))
+        device = Device(name = request.values["device-name"],description=request.values["device-description"],system=int(system_id),device_manager=current_user.id,device_type_id=request.values.get("device-type"))
         db.session.add(device)
         db.session.commit()
-        return redirect(url_for('auth.system_detail',system_id=request.values["system_id"]),code=307)
+        return redirect(url_for('auth.system_detail',system_id=int(system_id)),code=307)
     device_types = DeviceType.query.all()
     parameters_of_device_types = {}
     for device_type in device_types:
@@ -145,7 +153,7 @@ def device_create():
         for parameter in device_type.parameters:
             parameter_names.append(parameter.name)
         parameters_of_device_types[device_type.name] = parameter_names
-    return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=request.values["system_id"])
+    return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=int(system_id))
 
 
 @auth.route("/systems/create",methods=['GET', 'POST'])
