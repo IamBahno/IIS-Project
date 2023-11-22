@@ -136,7 +136,15 @@ def system_detail(system_id):
 
     system=System.query.filter_by(id = int(system_id)).first()
     devices = Device.query.filter_by(system=system.id).all()
-    return render_template('system_detail.html',system=system,devices=devices,user=current_user)
+    device_types = [DeviceType.query.filter_by(id=device.device_type_id).first()  for device in devices]
+    # parameters_of_devices = [Parameter.query.filter_by(device_types=device_type).all() for  device_type in device_types]
+    parameters_of_devices = [device_type.parameters for  device_type in device_types]
+    values_of_devices = []
+    for parameters,device in zip(parameters_of_devices,devices):
+        values = [Value.query.filter_by(parameter=parameter.id,device=device.id).order_by(Value.timestamp.desc()).first() for parameter in parameters]
+        values_of_devices.append(values)
+  
+    return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,values=values_of_devices)
 
 
 @auth.route("/systems/<system_id>/<device_id>",methods=['GET', 'POST'])
