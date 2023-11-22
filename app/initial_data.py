@@ -1,4 +1,5 @@
-from app.models import Parameter,DeviceType
+from app.models import Parameter,DeviceType,User
+from app import bcrypt
 
 def initial_data(db):
     parameter1=Parameter(name='temperature', unit='Celsius')
@@ -24,5 +25,6 @@ def initial_data(db):
     device_type3.parameters.append(parameter3)
     db.session.commit()
 
-    
+    admin=User(username="admin",hashed_password=bcrypt.generate_password_hash("admin_heslo").decode('utf-8'),first_name="admin",last_name="admin",role="admin")
+    admin=User(username="broker",hashed_password=bcrypt.generate_password_hash("broker_heslo").decode('utf-8'),first_name="broker",last_name="broker",role="broker")
     
