@@ -26,5 +26,7 @@ def initial_data(db):
     db.session.commit()
 
     admin=User(username="admin",hashed_password=bcrypt.generate_password_hash("admin_heslo").decode('utf-8'),first_name="admin",last_name="admin",role="admin")
-    admin=User(username="broker",hashed_password=bcrypt.generate_password_hash("broker_heslo").decode('utf-8'),first_name="broker",last_name="broker",role="broker")
-    
+    broker=User(username="broker",hashed_password=bcrypt.generate_password_hash("broker_heslo").decode('utf-8'),first_name="broker",last_name="broker",role="broker")
+    db.session.add(admin)
+    db.session.add(broker)
+    db.session.commit()

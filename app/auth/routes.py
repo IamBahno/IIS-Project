@@ -94,7 +94,7 @@ def systems():
     systems_in_db =  System.query.all()
     for i in systems_in_db:
         system_privilages = False
-        if(current_user.is_authenticated and (current_user.id == i.system_manager or i in current_user.used_systems)):
+        if(current_user.is_authenticated and (current_user.id == i.system_manager or i in current_user.used_systems or current_user.role == "admin" or current_user.role == "broker")):
             system_privilages = True
         if system_privilages:
             button = "detail"
@@ -110,6 +110,8 @@ def systems():
 
 @auth.route("/systems/detail",methods=['GET', 'POST'])
 def system_detail():
+    if request.method == "GET" and "device-detail" in request.values:
+        return redirect(url_for('auth.device_detail',user=request.values["user_id"],device=request.values["device_id"]))
     if "system_id" in request.values:
         if "add-device" in request.values:
             return redirect(url_for('auth.device_create',system_id=request.values["system_id"]),code=307)
@@ -128,8 +130,12 @@ def system_detail():
 
         system=System.query.filter_by(id = int(request.values["system_id"])).first()
         devices = Device.query.filter_by(system=system.id).all()
-        return render_template('system_detail.html',system=system,devices=devices)
+        return render_template('system_detail.html',system=system,devices=devices,user=current_user)
     return "<p>ahoj</p>"
+
+@auth.route("/systems/device/detail",methods=['GET', 'POST'])
+def device_detail():
+    return render_template('device_detail.html')
 
 @auth.route("/device/create",methods=['GET', 'POST'])
 def device_create():

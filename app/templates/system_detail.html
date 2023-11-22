@@ -4,31 +4,43 @@
     <p>{{ system.description }}</p>
     <!-- TODO: zadosti o system -->
 
-    {% for request in system.users_requesting %}
-        "user: "{{request.username}}" id:"{{request.id}} 
-        <form method="POST">
-            <input type="hidden" name="system_id" value="{{ system.id }}">
-            <input type="hidden" name="request_user_id" value="{{ request.id }}">
-            <button type="submit" name="request-accept">Accept</button>
-        </form>
+    {% if system.system_manager == user.id or user.role == "admin" %}
+        {% for request in system.users_requesting %}
+            "user: "{{request.username}}" id:"{{request.id}} 
+            <form method="POST">
+                <input type="hidden" name="system_id" value="{{ system.id }}">
+                <input type="hidden" name="request_user_id" value="{{ request.id }}">
+                <button type="submit" name="request-accept">Accept</button>
+            </form>
 
-        <form method="POST">
-            <input type="hidden" name="system_id" value="{{ system.id }}">
-            <input type="hidden" name="request_user_id" value="{{ request.id }}">
-            <button type="submit" name="request-decline">Decline</button>
-        </form>
-        <br>
+            <form method="POST">
+                <input type="hidden" name="system_id" value="{{ system.id }}">
+                <input type="hidden" name="request_user_id" value="{{ request.id }}">
+                <button type="submit" name="request-decline">Decline</button>
+            </form>
+            <br>
 
-    {% endfor %}
+        {% endfor %}
+    {% endif %}
 
     <!--  TODO parameter values -->
     {% for device in devices %}
-        {{device.name}} {{device.description}}
+        {{device.name}} {{device.description}} 
+            <form method="GET">
+                <input type="hidden" name="device_id" value="{{ device.id }}">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <button type="submit" name="device-detail">Detail</button>
+            </form>
+ 
         <br>
     {% endfor %}
 
-    <form method="POST">
-        <input type="hidden" name="system_id" value="{{ system.id }}">
-        <button type="submit" name="add-device">Add device</button>
-    </form>
+    {% if system.system_manager == user.id or user.role == "admin" %}
+
+        <form method="POST">
+            <input type="hidden" name="system_id" value="{{ system.id }}">
+            <button type="submit" name="add-device">Add device</button>
+        </form>
+    {% endif %}
+    
 {% endblock content %}
