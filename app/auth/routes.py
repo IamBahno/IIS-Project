@@ -135,7 +135,7 @@ def system_detail(system_id):
 
     system=System.query.filter_by(id = int(system_id)).first()
     devices = Device.query.filter_by(system=system.id).all()
-    return render_template('system_detail.html',system=system,devices=devices)
+    return render_template('system_detail.html',system=system,devices=devices,user=current_user)
 
 
 auth.route("/systems/device/detail",methods=['GET', 'POST'])
