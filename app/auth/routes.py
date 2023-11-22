@@ -14,8 +14,8 @@ def login():
     # Login form (you can handle this part)
     # Extract login form data and perform login logic here
     if request.method == 'POST':
-        username = request.form['login-username']
-        password = request.form['login-password']
+        username = request.values['login-username']
+        password = request.values['login-password']
         user = User.query.filter_by(username=username).first()
         if user and bcrypt.check_password_hash(user.hashed_password,password):
             flash('Login successful', 'success')
@@ -39,11 +39,11 @@ def register():
         return redirect(url_for(auth.home))
     if request.method == 'POST':
 #         # Registration form
-        username = request.form['username']
-        password = request.form['password']
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        role = request.form['role']
+        username = request.values['username']
+        password = request.values['password']
+        first_name = request.values['first_name']
+        last_name = request.values['last_name']
+        role = request.values['role']
 
 
         # Create a new User record and add it to the database
@@ -70,19 +70,19 @@ def home():
 def systems():
     if request.method == 'POST':
         #add system button
-        if 'add-system-button' in request.form:
+        if 'add-system-button' in request.values:
             # The 'add-system-button' button was clicked
             # Handle the logic for creating a system here
             return redirect(url_for('auth.system_create'))
-        if request.method == 'POST' and 'system-button-detail' in request.form:
-            return redirect(url_for('auth.system_detail',system_id=request.form["system_id"]),code=307)
-        elif request.method == 'POST' and "system-button-request" in request.form:
-            # system = System.query.filter_by(id=request.form["system_id"])
-            current_user.request_system.append(System.query.filter_by(id=request.form["system_id"]).first())
+        if request.method == 'POST' and 'system-button-detail' in request.values:
+            return redirect(url_for('auth.system_detail',system_id=request.values["system_id"]),code=307)
+        elif request.method == 'POST' and "system-button-request" in request.values:
+            # system = System.query.filter_by(id=request.values["system_id"])
+            current_user.request_system.append(System.query.filter_by(id=request.values["system_id"]).first())
             db.session.add(current_user)
             db.session.commit()
-        elif request.method == 'POST' and "system-button-delete" in request.form:
-            system = System.query.filter_by(id=request.form["system_id"]).first()
+        elif request.method == 'POST' and "system-button-delete" in request.values:
+            system = System.query.filter_by(id=request.values["system_id"]).first()
             db.session.delete(system)
             db.session.commit()
                 
@@ -110,34 +110,34 @@ def systems():
 
 @auth.route("/systems/detail",methods=['GET', 'POST'])
 def system_detail():
-    if "system_id" in request.form:
-        if "add-device" in request.form:
-            return redirect(url_for('auth.device_create',system_id=request.form["system_id"]),code=307)
-        elif "request-accept" in request.form:
-            delete_system_request(user_id = int(request.form["request_user_id"]), system_id = int(request.form["system_id"]),db = db)
+    if "system_id" in request.values:
+        if "add-device" in request.values:
+            return redirect(url_for('auth.device_create',system_id=request.values["system_id"]),code=307)
+        elif "request-accept" in request.values:
+            delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(request.values["system_id"]),db = db)
 
-            user = User.query.filter_by(id=request.form["request_user_id"]).first()
-            system=System.query.filter_by(id = request.form["system_id"]).first()
+            user = User.query.filter_by(id=request.values["request_user_id"]).first()
+            system=System.query.filter_by(id = request.values["system_id"]).first()
             system.users.append(user)
             db.session.add(system)
             db.session.add(user)
             db.session.commit()
 
-        elif "request-decline" in request.form:
-            delete_system_request(user_id = int(request.form["request_user_id"]), system_id = int(request.form["system_id"]),db = db)
+        elif "request-decline" in request.values:
+            delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(request.values["system_id"]),db = db)
 
-        system=System.query.filter_by(id = int(request.form["system_id"])).first()
+        system=System.query.filter_by(id = int(request.values["system_id"])).first()
         devices = Device.query.filter_by(system=system.id).all()
         return render_template('system_detail.html',system=system,devices=devices)
     return "<p>ahoj</p>"
 
 @auth.route("/device/create",methods=['GET', 'POST'])
 def device_create():
-    if "create-device" in request.form:
-        device = Device(name = request.form["device-name"],description=request.form["device-description"],system=request.form["system_id"],device_manager=current_user.id,device_type_id=request.form.get("device-type"))
+    if "create-device" in request.values:
+        device = Device(name = request.values["device-name"],description=request.values["device-description"],system=request.values["system_id"],device_manager=current_user.id,device_type_id=request.values.get("device-type"))
         db.session.add(device)
         db.session.commit()
-        return redirect(url_for('auth.system_detail',system_id=request.form["system_id"]),code=307)
+        return redirect(url_for('auth.system_detail',system_id=request.values["system_id"]),code=307)
     device_types = DeviceType.query.all()
     parameters_of_device_types = {}
     for device_type in device_types:
@@ -145,19 +145,19 @@ def device_create():
         for parameter in device_type.parameters:
             parameter_names.append(parameter.name)
         parameters_of_device_types[device_type.name] = parameter_names
-    return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=request.form["system_id"])
+    return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=request.values["system_id"])
 
 
 @auth.route("/systems/create",methods=['GET', 'POST'])
 def system_create():
     if request.method == 'POST':
         #add system button
-        if 'create-system' in request.form:
+        if 'create-system' in request.values:
             if not current_user.is_authenticated:
                 flash("Log-in first")
                 print("Log-in first")
-            system_name = request.form['system-name']
-            system_description = request.form['system-description']
+            system_name = request.values['system-name']
+            system_description = request.values['system-description']
             if(System.query.filter_by(name=system_name).first() != None):
                 print("System with that name already exists")
             #zjistit jestli uz neni system toho jmena
