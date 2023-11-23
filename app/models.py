@@ -154,3 +154,14 @@ def delete_system_request(user_id = None, system_id = None,db = None):
     db.session.add(system)
     db.session.add(user)
     db.session.commit()
+
+def parameters_of_system(system_id):
+    if system_id != None:
+        system = System.query.filter_by(id=system_id).first()
+        devices = system.devices
+        device_types_list = [DeviceType.query.filter_by(id=device.device_type_id).first() for device in devices]
+        device_types_set = set(device_types_list) #throws out duplicates
+        parameters = []
+        for device_type in device_types_set:
+            parameters.extend(device_type.parameters)
+        return set(parameters)

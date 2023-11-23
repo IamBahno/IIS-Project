@@ -1,5 +1,5 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for
-from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request
+from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
@@ -12,8 +12,6 @@ auth = Blueprint('auth', __name__)
 def login():
     if current_user.is_authenticated:
         return redirect(url_for(auth.home))
-    # Login form (you can handle this part)
-    # Extract login form data and perform login logic here
     if request.method == 'POST':
         username = request.values['login-username']
         password = request.values['login-password']
@@ -23,7 +21,6 @@ def login():
             login_user(user)
             return redirect(url_for('auth.home'))
 
-                # Redirect to a profile page or wherever you want
         else:
             flash('Login failed. Please check your credentials.', 'danger')
     return render_template('login.html', title='Login')
@@ -33,7 +30,6 @@ def logout():
     logout_user()
     return redirect(url_for('auth.home'))
 
-#TODO unique username constaint
 @auth.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -69,9 +65,7 @@ def register():
 def home():
     return redirect(url_for('auth.systems'))
 
-# TODO pridat device do systemu, pridat kpi
-#TODO request detail
-#TODO pridat ze detail bude mit i user kterej usuje
+# TODO pridat kpi
 @auth.route("/systems",methods=['GET', 'POST'])
 def systems():
     if request.method == 'POST':
@@ -113,7 +107,7 @@ def systems():
     return render_template('systems.html',systems=systems)
 
 
-
+#TODO delete device
 @auth.route("/systems/<system_id>",methods=['GET', 'POST'])
 def system_detail(system_id):
     if request.method == "GET" and "device-detail" in request.values:
@@ -137,7 +131,6 @@ def system_detail(system_id):
     system=System.query.filter_by(id = int(system_id)).first()
     devices = Device.query.filter_by(system=system.id).all()
     device_types = [DeviceType.query.filter_by(id=device.device_type_id).first()  for device in devices]
-    # parameters_of_devices = [Parameter.query.filter_by(device_types=device_type).all() for  device_type in device_types]
     parameters_of_devices = [device_type.parameters for  device_type in device_types]
     values_of_devices = []
     for parameters,device in zip(parameters_of_devices,devices):
@@ -201,6 +194,14 @@ def system_create():
             print("system created")
             return redirect(url_for('auth.systems'))
     return render_template('system_create.html')
+
+@auth.route("/systems/<system_id>/kpi/create",methods=['GET','POST'])
+def kpi_create(system_id):
+    if "add-kpi" in request.values:
+        parameters = parameters_of_system(system_id)
+        return render_template('kpi_create.html',parameters=parameters)
+        
+    return "<p>nevadi</p>"
 
 # @auth.route("/test",methods=['GET', 'POST'])
 # @login_required

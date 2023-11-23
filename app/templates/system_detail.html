@@ -48,6 +48,9 @@
             <input type="hidden" name="system_id" value="{{ system.id }}">
             <button type="submit" name="add-device">Add device</button>
         </form>
+        <form method="POST" action="/systems/{{system.id}}/kpi/create">
+            <button type="submit" name="add-kpi">Define kpi</button>
+        </form>
     {% endif %}
     
 {% endblock content %}
