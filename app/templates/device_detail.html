@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-    {%  for value,parameter in zip(values,parameters) %}
-        VALUE {{value.value}} {{parameter.unit}}
+    {%  for value,parameter,kpis_for_parameter,kpi_states in zip(values,parameters,kpis,kpi_parameters_states) %}
+        {{parameter.name}}: {{value.value}} {{parameter.unit}}
+                {% for kpi,kpi_state in zip(kpis_for_parameter,kpi_states) %}
+                    <br>{{kpi.name}} {{kpi_state}}
+                {% endfor %}
             {% if user.role == "broker" or user.role == "admin" %}
                 <form method="POST">
                     <label for="value">Value</label>

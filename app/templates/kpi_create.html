@@ -1,8 +1,25 @@
 {% extends "layout.html" %}
 {% block content %}
-    <select class="form-select" type="parameter" id="parameter" name="parameter">
-        {% for parameter in parameters %}
-            <option value={{parameter.id}} selected>{{parameter.name}}</option>            
-        {% endfor %}
-    </select>
+    <form method="POST">
+
+
+        <label for="kpi_name">Name:</label>
+        <input type="text" class="form-control" id="kpi_name" name="kpi_name">
+        <label for="kpi_description">Description:</label>
+        <input type="text" class="form-control" id="kpi_description" name="kpi_description">
+
+        <label for="parameter">Parameter:</label>
+        <select class="form-select" type="parameter" id="parameter" name="parameter">
+            {% for parameter in parameters %}
+                <option value={{parameter.id}} selected>{{parameter.name}}</option>            
+            {% endfor %}
+        </select>
+
+        <label for="lower_limit">Lower limit:</label>
+        <input type="text" class="form-control" id="lower_limit" name="lower_limit">
+        <label for="upper_limit">Upper limit</label>
+        <input type="text" class="form-control" id="upper_limit" name="upper_limit">
+        <label for="create-kpi">Create KPI</label>
+        <input type="submit" class="form-control" name="create-kpi">
+    </form>
 {% endblock content %}

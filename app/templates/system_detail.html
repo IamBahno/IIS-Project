@@ -26,11 +26,14 @@
     {% endif %}
 
     <!--  TODO parameter values -->
-    {% for device,parameters,values in zip(devices,parameters,values) %}
+    {% for device,parameters,values,kpis_of_parameters,kpis_states_of_parameters in zip(devices,parameters,values,kpis_of_devices,kpis_states_of_devices) %}
         {{device.name}} {{device.description}}
-
-            {% for parameter,value in zip(parameters,values) %}
-                {{value.value}} {{parameter.unit}}<br>
+            <br>
+            {% for parameter,value,kpis,kpi_states in zip(parameters,values,kpis_of_parameters,kpis_states_of_parameters) %}
+                {{parameter.name}}: {{value.value}} {{parameter.unit}}<br>
+                    {% for kpi,kpi_state in zip(kpis,kpi_states) %}
+                        {{kpi.name}}: {{kpi_state}}<br>
+                    {% endfor %}
             {% endfor %}
 
 
@@ -49,7 +52,7 @@
             <button type="submit" name="add-device">Add device</button>
         </form>
         <form method="POST" action="/systems/{{system.id}}/kpi/create">
-            <button type="submit" name="add-kpi">Define kpi</button>
+            <button type="submit" name="add-kpi-form">Define kpi</button>
         </form>
     {% endif %}
     
