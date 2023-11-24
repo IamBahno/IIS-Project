@@ -1,11 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container">
+<div class="container mb-4">
 
     <h1>system: {{ system.name }}</h1>
     <p>{{ system.description }}</p>
     <!-- TODO: zadosti o system -->
-
     {% if system.system_manager == user.id or user.role == "admin" %}
         {% for request in system.users_requesting %}
             "user: "{{request.username}}" id:"{{request.id}} 
@@ -26,34 +25,43 @@
     {% endif %}
 
     <!--  TODO parameter values -->
+    <!--  TODO KPI styles, request styles -->
     {% for device,parameters,values,kpis_of_parameters,kpis_states_of_parameters in zip(devices,parameters,values,kpis_of_devices,kpis_states_of_devices) %}
-        {{device.name}} {{device.description}}
-            <br>
             {% for parameter,value,kpis,kpi_states in zip(parameters,values,kpis_of_parameters,kpis_states_of_parameters) %}
-                {{parameter.name}}: {{value.value}} {{parameter.unit}}<br>
                     {% for kpi,kpi_state in zip(kpis,kpi_states) %}
                         {{kpi.name}}: {{kpi_state}}<br>
                     {% endfor %}
             {% endfor %}
-
-
-        <form method="POST" action="/systems/{{system.id}}/{{device.id}}">
-                <input type="hidden" name="user_id" value="{{ user.id }}">
-            <button type="submit" name="device-detail">Detail</button>
-        </form>
  
         <br>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{device.name}}</h5>
+                <p class="card-text">{{device.description}}</p>
+                <ul class="list-group list-group-flush">
+                    {% for parameter,value,kpis,kpi_states in zip(parameters,values,kpis_of_parameters,kpis_states_of_parameters) %}
+                    <li class="list-group-item">{{parameter.name}}: {{value.value}} {{parameter.unit}}</li>
+                    {% endfor %}
+                </ul>
+                <form method="POST" class="d-grid gap-2 d-md-flex justify-content-md-end" action="/systems/{{system.id}}/{{device.id}}">
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <button class="btn btn-primary" type="submit" name="device-detail">Detail</button>
+                </form>
+            </div>
+        </div>
     {% endfor %}
 
     {% if system.system_manager == user.id or user.role == "admin" %}
 
-        <form method="POST">
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+        <form method="POST" class="d-grid">
             <input type="hidden" name="system_id" value="{{ system.id }}">
-            <button type="submit" name="add-device">Add device</button>
+            <button class="btn btn-secondary" type="submit" name="add-device">Add device</button>
         </form>
-        <form method="POST" action="/systems/{{system.id}}/kpi/create">
-            <button type="submit" name="add-kpi-form">Define kpi</button>
+        <form method="POST" class="d-grid" action="/systems/{{system.id}}/kpi/create">
+            <button class="btn btn-secondary" type="submit" name="add-kpi-form">Define kpi</button>
         </form>
+    </div>
     {% endif %}
-    
+</div>
 {% endblock content %}
