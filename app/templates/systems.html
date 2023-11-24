@@ -6,12 +6,12 @@
         <div class="accordion" id="systemsList">
             {% for system in systems %}
             <div class="accordion-item">
-                <h2 class="accordion-header" id="headingOne">
+                <h2 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#system_{{ system.id }}">
                     {{ system.name }} ({{ system.id }})
                 </button>
                 </h2>
-                <div id="system_{{ system.id }}" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#systemsList">
+                <div id="system_{{ system.id }}" class="accordion-collapse collapse" data-bs-parent="#systemsList">
                     <div class="accordion-body">
                         <table class="table table-responsive">
                             {% for kpis in system.kpis %}
