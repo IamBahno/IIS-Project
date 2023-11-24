@@ -145,12 +145,13 @@ def system_detail(system_id):
     for parameters,device in zip(parameters_of_devices,devices):
         values = [Value.query.filter_by(parameter=parameter.id,device=device.id).order_by(Value.timestamp.desc()).first() for parameter in parameters]
         values_of_devices.append(values)
-  
+    
+    kpis = Kpi.query.filter_by(system=system_id).all()
         #list of kpis for each parameter
     kpis_of_devices = [[Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters] for parameters in parameters_of_devices]
     kpis_states = [get_kpi_states(values,kpis) for values,kpis in zip(values_of_devices,kpis_of_devices)]
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
-                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states)
+                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis)
 
 
 @auth.route("/systems/<system_id>/<device_id>",methods=['GET', 'POST'])

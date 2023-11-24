@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container mb-4">
 
-    <h1>system: {{ system.name }}</h1>
+    <h1>System: {{ system.name }}</h1>
     <p>{{ system.description }}</p>
     <!-- TODO: zadosti o system -->
     {% if system.system_manager == user.id or user.role == "admin" %}
@@ -26,6 +26,7 @@
 
     <!--  TODO parameter values -->
     <!--  TODO KPI styles, request styles -->
+    <h3>Devices:</h3>
     {% for device,parameters,values,kpis_of_parameters,kpis_states_of_parameters in zip(devices,parameters,values,kpis_of_devices,kpis_states_of_devices) %}
             {% for parameter,value,kpis,kpi_states in zip(parameters,values,kpis_of_parameters,kpis_states_of_parameters) %}
                     {% for kpi,kpi_state in zip(kpis,kpi_states) %}
@@ -49,6 +50,19 @@
                 </form>
             </div>
         </div>
+    {% endfor %}
+
+    <h3>KPIs</h3>
+    {% for kpi in kpis %}
+        {{kpi.name}} {{kpi.description}}<br>
+        {{kpi.lower_limit}}<br>
+        {{kpi.upper_limit}}<br>
+
+        <form method="POST">
+                <input type="hidden" name="kpi_id" value="{{ kpi.id }}">
+            <button type="submit" name="kpi-delete">Delete</button>
+        </form>
+        <br>
     {% endfor %}
 
     {% if system.system_manager == user.id or user.role == "admin" %}
