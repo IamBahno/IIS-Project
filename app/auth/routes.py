@@ -178,19 +178,11 @@ def home():
 
 @auth.route("/systems/",methods=['GET', 'POST'])
 def systems():
-    if request.method == 'POST':
-        #add system button
-        if 'add-system-button' in request.values:
-            # The 'add-system-button' button was clicked
-            # Handle the logic for creating a system here
-            return redirect(url_for('auth.system_create'))
-        if request.method == 'POST' and 'system-button-detail' in request.values:
-            return redirect(url_for('auth.system_detail',system_id=request.values["system_id"]))
-        elif request.method == 'POST' and "system-button-request" in request.values:
-            # system = System.query.filter_by(id=request.values["system_id"])
-            current_user.request_system.append(System.query.filter_by(id=request.values["system_id"]).first())
-            db.session.add(current_user)
-            db.session.commit()
+    if request.method == 'POST' and "system-button-request" in request.values:
+        # system = System.query.filter_by(id=request.values["system_id"])
+        current_user.request_system.append(System.query.filter_by(id=request.values["system_id"]).first())
+        db.session.add(current_user)
+        db.session.commit()
 
     systems = []
     systems_in_db =  System.query.all()
