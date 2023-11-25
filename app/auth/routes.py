@@ -253,11 +253,14 @@ def system_detail(system_id):
         values_of_devices.append(values)
     
     kpis = Kpi.query.filter_by(system=system_id).all()
+    parameters = Parameter.query.all()
+    parameters_of_kpis = [parameters[kpi.parameter_id - 1] for kpi in kpis]
+    
         #list of kpis for each parameter
     kpis_of_devices = [[Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters] for parameters in parameters_of_devices]
     kpis_states = [get_kpi_states(values,kpis) for values,kpis in zip(values_of_devices,kpis_of_devices)]
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
-                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis)
+                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=zip(kpis, parameters_of_kpis))
 
 @auth.route("/systems/<int:system_id>/kpi/<int:kpi_id>/delete/",methods=['GET', 'POST'])
 @login_required
