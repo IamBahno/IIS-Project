@@ -1,32 +1,31 @@
 {% extends "layout.html" %}
 {% block content %}
 <form method="POST" class="container-sm" style="max-width:768px">
-    <h2>Create device</h2>
-    <input type="hidden" name="system_id" value="{{ system_id }}">
+    {{form.hidden_tag()}}
+    <h2>{{title}}</h2>
     <div class="form-floating mb-3">
-        <input type="text" class="form-control" id="device-name" placeholder="" name="device-name">
-        <label for="device-name">Name</label>
+        {{form.device_name(class="form-control" + (" is-invalid" if 'device_name' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+        {{form.device_name.label}}
+        {% if 'device_name' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['device_name'][0]}}</div>
+        {% endif %}
     </div>
     <div class="form-floating mb-3">
-        <textarea type="text" class="form-control" id="device-description" placeholder="" name="device-description" style="min-height:150px"></textarea>
-        <label for="device-description">Description</label>
+        {{form.device_description(class="form-control", placeholder="", style="min-height:150px")}}
+        {{form.device_description.label}}
+        {% if 'device_description' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['device_description'][0]}}</div>
+        {% endif %}
     </div>
     <div class="form-floating mb-3">
-        <select class="form-select" id="device-type" name="device-type">
-            {% for device_type in device_types %}
-                <option value={{device_type.id}}>
-                    {{device_type.name}}:
-    
-                    {% for parameter in parameters[device_type.name] %}
-                        {{ parameter }} ;
-                    {% endfor %}
-                </option>
-            {% endfor %}   
-        </select>
-        <label for="device-type">Device type</label>
+        {{form.device_type(class="form-control" + (" is-invalid" if 'device_type' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+        {{form.device_type.label}}
+        {% if 'device_type' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['device_type'][0]}}</div>
+        {% endif %}
     </div>
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <button type="submit" name="create-device" class="btn btn-primary">Create</button>
+        {{form.submit(class="btn btn-primary")}}
     </div>
 </form>
 {% endblock content %}
