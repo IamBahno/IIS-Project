@@ -212,7 +212,7 @@ def systems():
 @auth.route("/systems/<int:system_id>/delete/",methods=['GET', 'POST'])
 @login_required
 def system_delete(system_id):
-    system = System.query.filter_by(id=system_id).first()
+    system = System.query.get_or_404(system_id)
 
     if current_user.role != "admin" and current_user.id != system.system_manager:
         abort(403)
