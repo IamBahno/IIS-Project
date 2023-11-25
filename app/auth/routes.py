@@ -1,5 +1,5 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for
-from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system
+from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
@@ -183,8 +183,10 @@ def systems():
             button = "request pending"
         else:
             button = "request system use"
+        system_state = system_all_ok(i.id)
         systems.append({"name": i.name, "id": i.id,
-                        "button": button, "owner": True if system_privilages and i.system_manager == current_user.id else False})
+                        "button": button, "state":system_state,"owner": True if system_privilages and i.system_manager == current_user.id else False})
+
     return render_template('systems.html',systems=systems, title="Systems")
 
 
@@ -317,30 +319,6 @@ def kpi_create(system_id):
     parameters = parameters_of_system(system_id)
     return render_template('kpi_create.html',parameters=parameters)
 
-def get_kpi_states(values,kpis_for_parameters):
-    kpis_states_for_parameters = []
-    for kpis,value in zip(kpis_for_parameters,values):
-        kpis_states = []
-        for kpi in kpis:
-            if value == None or value.value == None:
-                kpis_states.append("KO")
-            elif kpi.lower_limit == None:
-                if value.value <= kpi.upper_limit:
-                    kpis_states.append("OK")
-                else:
-                    kpis_states.append("KO")
-            elif kpi.upper_limit == None:
-                if value.value >= kpi.lower_limit:
-                    kpis_states.append("OK")
-                else:
-                    kpis_states.append("KO")
-            else:
-                if value.value <= kpi.upper_limit and value.value >= kpi.lower_limit:
-                    kpis_states.append("OK")
-                else:
-                    kpis_states.append("KO")
-        kpis_states_for_parameters.append(kpis_states)
-    return kpis_states_for_parameters
 
 # @auth.route("/test",methods=['GET', 'POST'])
 # @login_required

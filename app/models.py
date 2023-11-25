@@ -165,3 +165,46 @@ def parameters_of_system(system_id):
         for device_type in device_types_set:
             parameters.extend(device_type.parameters)
         return set(parameters)
+
+def system_all_ok(system_id):
+    system = System.query.filter_by(id=system_id).first()
+    devices = Device.query.filter_by(system=system.id).all()
+    device_types = [DeviceType.query.filter_by(id=device.device_type_id).first() for device in devices]
+    parameters_of_devices = []
+    for device_type in device_types:
+        parameters = device_type.parameters
+        parameters_of_devices.append(parameters)
+
+    values_of_devices = [Value.query.filter_by(parameter=parameter.id,device=device.id).order_by(Value.timestamp.desc()).first()  for parameters,device in zip(parameters_of_devices,devices) for parameter in parameters  ]
+    kpis_of_devices = [Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameters in parameters_of_devices for parameter in parameters]
+    kpi_states_of_devices = get_kpi_states(values_of_devices,kpis_of_devices)
+    for kpi_states in kpi_states_of_devices:
+        for state in kpi_states:
+            if state == "KO":
+                return "KO"
+    return "OK"
+
+def get_kpi_states(values,kpis_for_parameters):
+    kpis_states_for_parameters = []
+    for kpis,value in zip(kpis_for_parameters,values):
+        kpis_states = []
+        for kpi in kpis:
+            if value == None or value.value == None:
+                kpis_states.append("KO")
+            elif kpi.lower_limit == None:
+                if value.value <= kpi.upper_limit:
+                    kpis_states.append("OK")
+                else:
+                    kpis_states.append("KO")
+            elif kpi.upper_limit == None:
+                if value.value >= kpi.lower_limit:
+                    kpis_states.append("OK")
+                else:
+                    kpis_states.append("KO")
+            else:
+                if value.value <= kpi.upper_limit and value.value >= kpi.lower_limit:
+                    kpis_states.append("OK")
+                else:
+                    kpis_states.append("KO")
+        kpis_states_for_parameters.append(kpis_states)
+    return kpis_states_for_parameters
