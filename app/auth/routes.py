@@ -38,6 +38,9 @@ class RegisterForm(FlaskForm):
         self.passwordConfirm.errors.append('Passwords do not match.')
         return False
 
+class KPIEditForm(FlaskForm):
+    pass
+
 class LoginForm(FlaskForm):
     #todo limit field lengths?
     username = StringField("Username*", validators=[DataRequired()])
@@ -182,10 +185,10 @@ def systems():
             button = "request system use"
         systems.append({"name": i.name, "id": i.id,
                         "button": button, "owner": True if system_privilages and i.system_manager == current_user.id else False})
-    return render_template('systems.html',systems=systems)
+    return render_template('systems.html',systems=systems, title="Systems")
 
 
-@auth.route("/systems/<system_id>/",methods=['GET', 'POST'])
+@auth.route("/systems/<int:system_id>/",methods=['GET', 'POST'])
 @login_required
 def system_detail(system_id):
     if request.method == "GET" and "device-detail" in request.values:
@@ -194,19 +197,19 @@ def system_detail(system_id):
     if "add-device" in request.values:
         return redirect(url_for('auth.device_create',system_id=system_id),code=307)
     elif "request-accept" in request.values:
-        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(system_id),db = db)
+        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
 
         user = User.query.filter_by(id=request.values["request_user_id"]).first()
-        system=System.query.filter_by(id=int(system_id)).first()
+        system=System.query.filter_by(id=system_id).first()
         system.users.append(user)
         db.session.add(system)
         db.session.add(user)
         db.session.commit()
 
     elif "request-decline" in request.values:
-        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = int(system_id),db = db)
+        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
 
-    system=System.query.filter_by(id = int(system_id)).first()
+    system=System.query.get_or_404(system_id)
     devices = Device.query.filter_by(system=system.id).all()
     device_types = [DeviceType.query.filter_by(id=device.device_type_id).first()  for device in devices]
     parameters_of_devices = [device_type.parameters for  device_type in device_types]
@@ -223,7 +226,7 @@ def system_detail(system_id):
                            values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis)
 
 
-@auth.route("/systems/<system_id>/<device_id>/",methods=['GET', 'POST'])
+@auth.route("/systems/<int:system_id>/devices/<int:device_id>/",methods=['GET', 'POST'])
 def device_detail(system_id, device_id):
     if "add-value" in request.values:
         value_value = request.values["value"]
@@ -244,17 +247,17 @@ def device_detail(system_id, device_id):
     kpis = [Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters]
     #list of kpi states for parameters
     kpi_states = get_kpi_states(values,kpis)
-    return render_template('device_detail.html', device_id=int(device_id), system_id=int(system_id),user=current_user,values=values,
+    return render_template('device_detail.html', device_id=int(device_id), system_id=system_id,user=current_user,values=values,
                            parameters=parameters,kpis=kpis,kpi_parameters_states=kpi_states,default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip)
     
-@auth.route("/systems/<system_id>/create/",methods=['GET', 'POST'])
+@auth.route("/systems/<int:system_id>/devices/create/",methods=['GET', 'POST'])
 def device_create(system_id):
     #todo wtforms convert
     if "create-device" in request.values:
-        device = Device(name = request.values["device-name"],description=request.values["device-description"],system=int(system_id),device_manager=current_user.id,device_type_id=request.values.get("device-type"))
+        device = Device(name = request.values["device-name"],description=request.values["device-description"],system=system_id,device_manager=current_user.id,device_type_id=request.values.get("device-type"))
         db.session.add(device)
         db.session.commit()
-        return redirect(url_for('auth.system_detail',system_id=int(system_id)),code=307)
+        return redirect(url_for('auth.system_detail',system_id=system_id),code=307)
     device_types = DeviceType.query.all()
     parameters_of_device_types = {}
     for device_type in device_types:
@@ -262,36 +265,47 @@ def device_create(system_id):
         for parameter in device_type.parameters:
             parameter_names.append(parameter.name)
         parameters_of_device_types[device_type.name] = parameter_names
-    return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=int(system_id))
+    return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=system_id)
 
 
 @auth.route("/systems/create/",methods=['GET', 'POST'])
+@auth.route("/systems/<int:system_id>/edit/",methods=['GET', 'POST'])
 @login_required
-def system_create():
+def system_create(system_id = None):
     form = SystemEditForm()
+    title = "Create system"
+
+    if system_id:
+        system = System.query.get_or_404(system_id)
 
     if form.validate_on_submit():
         #add system button
-        if form.system_name_edit.data == "":
+        if not system_id:
             system = System(name=form.system_name.data,description=form.system_description.data,system_manager=current_user.id)
             db.session.add(system)
         else:
             #todo check
-            system = System.query.filter_by(name=form.system_name_edit.name).first()
             system.name = form.system_name.data
             system.description = form.system_description.data
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
         return redirect(url_for('auth.system_detail', system_id = system.id))
+    elif system_id and not form.is_submitted():
+        form.system_name_edit.data = system.name
+        form.system_name.data = system.name
+        form.system_description.data = system.description
+        title = f"Edit system {system_id}"
 
-    return render_template('system_create.html', form=form)
+    return render_template('system_create.html', form=form, title=title)
 
-@auth.route("/systems/<system_id>/kpi/create/",methods=['GET','POST'])
+@auth.route("/systems/<int:system_id>/kpi/create/",methods=['GET','POST'])
 @login_required
 def kpi_create(system_id):
-    if "add-kpi-form" in request.values:
-        parameters = parameters_of_system(system_id)
-        return render_template('kpi_create.html',parameters=parameters)
-    elif "create-kpi" in request.values:
+    form = KPIEditForm()
+    title = "Create KPI"
+    if form.validate_on_submit():
         lower_limit = float(request.values["lower_limit"]) if request.values["lower_limit"] != "" else None
         upper_limit = float(request.values["upper_limit"]) if request.values["upper_limit"] != "" else None
         kpi = Kpi(name=request.values["kpi_name"],description=request.values["kpi_description"],system=system_id,
@@ -300,7 +314,8 @@ def kpi_create(system_id):
         db.session.commit()
         return redirect(f'/systems/{system_id}')
 
-    return "<p>nevadi</p>"
+    parameters = parameters_of_system(system_id)
+    return render_template('kpi_create.html',parameters=parameters)
 
 def get_kpi_states(values,kpis_for_parameters):
     kpis_states_for_parameters = []

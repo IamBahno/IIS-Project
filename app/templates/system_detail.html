@@ -4,6 +4,9 @@
 
     <h1>System: {{ system.name }}</h1>
     <p>{{ system.description }}</p>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
+            <a class="btn btn-secondary" href="/systems/{{system.id}}/edit">Edit system</a>
+    </div>
     <!-- TODO: zadosti o system -->
     {% if system.system_manager == user.id or user.role == "admin" %}
         {% for request in system.users_requesting %}
@@ -44,10 +47,9 @@
                     <li class="list-group-item">{{parameter.name}}: {{value.value}} {{parameter.unit}}</li>
                     {% endfor %}
                 </ul>
-                <form method="POST" class="d-grid gap-2 d-md-flex justify-content-md-end" action="/systems/{{system.id}}/{{device.id}}">
-                    <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <button class="btn btn-primary" type="submit" name="device-detail">Detail</button>
-                </form>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a class="btn btn-primary" href="/systems/{{system.id}}/devices/{{device.id}}">Detail</a>
+                </div>
             </div>
         </div>
     {% endfor %}
@@ -68,13 +70,8 @@
     {% if system.system_manager == user.id or user.role == "admin" %}
 
     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-        <form method="POST" class="d-grid">
-            <input type="hidden" name="system_id" value="{{ system.id }}">
-            <button class="btn btn-secondary" type="submit" name="add-device">Add device</button>
-        </form>
-        <form method="POST" class="d-grid" action="/systems/{{system.id}}/kpi/create">
-            <button class="btn btn-secondary" type="submit" name="add-kpi-form">Define kpi</button>
-        </form>
+        <a class="btn btn-secondary" href="/systems/{{system.id}}/devices/create">Add device</a>
+        <a class="btn btn-secondary" href="/systems/{{system.id}}/kpi/create">Define kpi</a>
     </div>
     {% endif %}
 </div>

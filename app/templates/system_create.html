@@ -3,7 +3,7 @@
 <form method="POST" class="container-sm" style="max-width:768px" novalidate>
     {{form.hidden_tag()}}
     {{form.system_name_edit()}}
-    <h2>Create system</h2>
+    <h2>{{title}}</h2>
     <div class="form-floating mb-3">
         {{form.system_name(class="form-control" + (" is-invalid" if 'system_name' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
         {{form.system_name.label}}
