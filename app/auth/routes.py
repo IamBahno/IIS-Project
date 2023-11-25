@@ -191,11 +191,11 @@ def systems():
         if(current_user.is_authenticated and (current_user.id == i.system_manager or i in current_user.used_systems or current_user.role == "admin" or current_user.role == "broker")):
             system_privilages = True
         if system_privilages:
-            button = "detail"
+            button = "Detail"
         elif current_user in i.users_requesting:
-            button = "request pending"
+            button = "Request pending"
         else:
-            button = "request system use"
+            button = "Request system use"
         system_state = system_all_ok(i.id)
         systems.append({"name": i.name, "id": i.id,
                         "button": button, "state":system_state,"owner": True if system_privilages and i.system_manager == current_user.id else False})
@@ -205,7 +205,7 @@ def systems():
 @auth.route("/systems/<int:system_id>/delete/",methods=['GET', 'POST'])
 @login_required
 def system_delete(system_id):
-    system = System.query.get_or_404(id=system_id)
+    system = System.query.filter_by(id=system_id).first()
 
     if current_user.role != "admin" and current_user.id != system.system_manager:
         abort(403)
