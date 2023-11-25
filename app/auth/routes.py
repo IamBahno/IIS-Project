@@ -335,7 +335,6 @@ def device_create(system_id, device_id = None):
         else:
             device.name = form.device_name.data
             device.description = form.device_description.data
-            device.device_type_id = form.device_type.data
 
         db.session.commit()
         return redirect(url_for('auth.system_detail',system_id=system_id))
@@ -344,6 +343,7 @@ def device_create(system_id, device_id = None):
         form.device_name.data = device.name
         form.device_description.data = device.description
         form.device_type.data = device.device_type_id
+        form.device_type.flags.disabled = True
         title = f"Edit device {device_id}"
 
 
