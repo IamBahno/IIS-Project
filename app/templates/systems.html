@@ -36,8 +36,7 @@
                             </form>
                             <form class="d-grid gap-2 d-md-flex justify-content-md-end" method="POST">
                                 {% if system.owner == True %}
-                                    <button class="btn btn-danger" type="submit" name="system-button-delete" >DELETE</button>
-                                    <input type="hidden" name="system_id" value="{{ system.id }}">
+                                    <a class="btn btn-danger" href="/systems/{{system.id}}/delete/">Delete</a>
                                 {% endif %}
                             </form>
                         </div>
