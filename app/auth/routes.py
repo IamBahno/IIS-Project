@@ -178,7 +178,7 @@ def systems():
             # Handle the logic for creating a system here
             return redirect(url_for('auth.system_create'))
         if request.method == 'POST' and 'system-button-detail' in request.values:
-            return redirect(url_for('auth.system_detail',system_id=request.values["system_id"]),code=307)
+            return redirect(url_for('auth.system_detail',system_id=request.values["system_id"]))
         elif request.method == 'POST' and "system-button-request" in request.values:
             # system = System.query.filter_by(id=request.values["system_id"])
             current_user.request_system.append(System.query.filter_by(id=request.values["system_id"]).first())
@@ -250,25 +250,25 @@ def system_detail(system_id):
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
                            values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis)
 
-@auth.route("/systems/<int:system_id>/kpi_delete/<int:kpi_id>/",methods=['GET', 'POST'])
+@auth.route("/systems/<int:system_id>/kpi/<int:kpi_id>/delete/",methods=['GET', 'POST'])
 @login_required
 def kpi_delete(system_id, kpi_id):
-    system = System.query.filter_by(id=system_id).first()
+    system = System.query.get_or_404(system_id)
     if(current_user.role == "admin" or current_user.id == system.system_manager):
-        kpi = Kpi.query.filter_by(id=kpi_id).first()
+        kpi = Kpi.query.get_or_404(kpi_id)
         db.session.delete(kpi)
         db.session.commit()
-    return redirect(url_for('auth.system_detail',system_id=system_id),code=307)
+    return redirect(url_for('auth.system_detail',system_id=system_id))
 
-@auth.route("/systems/<int:system_id>/device_delete/<int:device_id>/",methods=['GET', 'POST'])
+@auth.route("/systems/<int:system_id>/devices/<int:device_id>/delete/",methods=['GET', 'POST'])
 @login_required
 def device_delete(system_id, device_id):
-    system = System.query.filter_by(id=system_id).first()
+    system = System.query.get_or_404(system_id)
     if(current_user.role == "admin" or current_user.id == system.system_manager):
-        device = Device.query.filter_by(id=device_id).first()
+        device = Device.query.get_or_404(device_id)
         db.session.delete(device)
         db.session.commit()
-    return redirect(url_for('auth.system_detail',system_id=system_id),code=307)
+    return redirect(url_for('auth.system_detail',system_id=system_id))
 
 
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/",methods=['GET', 'POST'])
@@ -302,7 +302,7 @@ def device_create(system_id):
         device = Device(name = request.values["device-name"],description=request.values["device-description"],system=system_id,device_manager=current_user.id,device_type_id=request.values.get("device-type"))
         db.session.add(device)
         db.session.commit()
-        return redirect(url_for('auth.system_detail',system_id=system_id),code=307)
+        return redirect(url_for('auth.system_detail',system_id=system_id))
     device_types = DeviceType.query.all()
     parameters_of_device_types = {}
     for device_type in device_types:

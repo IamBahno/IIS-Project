@@ -48,7 +48,7 @@
                     {% endfor %}
                 </ul>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <a class="btn btn-danger" href="/systems/{{system.id}}/device_delete/{{device.id}}">Delete</a>
+                    <a class="btn btn-danger" href="/systems/{{system.id}}/devices/{{device.id}}/delete/">Delete</a>
                     <a class="btn btn-primary" href="/systems/{{system.id}}/devices/{{device.id}}">Detail</a>
                 </div>
             </div>
@@ -67,7 +67,7 @@
                     <li class="list-group-item">{parameter name} {{kpi.upper_limit}} {unit}</li>
                 </ul>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <a class="btn btn-danger" href="/systems/{{system.id}}/kpi_delete/{{kpi.id}}">Delete</a>
+                    <a class="btn btn-danger" href="/systems/{{system.id}}/kpi/{{kpi.id}}/delete/">Delete</a>
                     <a class="btn btn-primary" href="/systems/{{system.id}}/kpi/{{kpi.id}}/edit/">Edit</a>
                 </div>
             </div>
