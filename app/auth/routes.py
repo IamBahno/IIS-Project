@@ -1,4 +1,4 @@
-from flask import render_template, request, Blueprint, flash, redirect, url_for
+from flask import render_template, request, Blueprint, flash, redirect, url_for, abort
 from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
@@ -210,9 +210,12 @@ def systems():
 @login_required
 def system_delete(system_id):
     system = System.query.get_or_404(id=system_id)
-    if(current_user.role == "admin" or current_user.id == system.system_manager):
-        db.session.delete(system)
-        db.session.commit()
+    
+    if current_user.role != "admin" and current_user.id != system.system_manager:
+        abort(403)
+
+    db.session.delete(system)
+    db.session.commit()
     return redirect(url_for('auth.systems',system_id=system_id))
 
 @auth.route("/systems/<int:system_id>/",methods=['GET', 'POST'])
@@ -256,24 +259,31 @@ def system_detail(system_id):
 @login_required
 def kpi_delete(system_id, kpi_id):
     system = System.query.get_or_404(system_id)
-    if(current_user.role == "admin" or current_user.id == system.system_manager):
-        kpi = Kpi.query.get_or_404(kpi_id)
-        db.session.delete(kpi)
-        db.session.commit()
+
+    if current_user.role != "admin" and current_user.id != system.system_manager:
+        abort(403)
+
+    kpi = Kpi.query.get_or_404(kpi_id)
+    db.session.delete(kpi)
+    db.session.commit()
     return redirect(url_for('auth.system_detail',system_id=system_id))
 
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/delete/",methods=['GET', 'POST'])
 @login_required
 def device_delete(system_id, device_id):
     system = System.query.get_or_404(system_id)
-    if(current_user.role == "admin" or current_user.id == system.system_manager):
-        device = Device.query.get_or_404(device_id)
-        db.session.delete(device)
-        db.session.commit()
+
+    if current_user.role != "admin" and current_user.id != system.system_manager:
+        abort(403)
+
+    device = Device.query.get_or_404(device_id)
+    db.session.delete(device)
+    db.session.commit()
     return redirect(url_for('auth.system_detail',system_id=system_id))
 
 
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/",methods=['GET', 'POST'])
+@login_required
 def device_detail(system_id, device_id):
     if "add-value" in request.values:
         value_value = request.values["value"]
@@ -325,6 +335,9 @@ def system_create(system_id = None):
     if system_id:
         system = System.query.get_or_404(system_id)
 
+        if current_user.role != "admin" and current_user.id != system.system_manager:
+            abort(403)
+
     if form.validate_on_submit():
         #add system button
         if not system_id:
@@ -356,6 +369,9 @@ def kpi_create(system_id, kpi_id = None):
     title = "Create KPI"
 
     system = System.query.get_or_404(system_id)
+
+    if current_user.role != "admin" and current_user.id != system.system_manager:
+        abort(403)
 
     if kpi_id:
         kpi = Kpi.query.get_or_404(kpi_id)
