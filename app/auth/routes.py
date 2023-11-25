@@ -224,25 +224,28 @@ def system_delete(system_id):
 @auth.route("/systems/<int:system_id>/",methods=['GET', 'POST'])
 @login_required
 def system_detail(system_id):
-    if request.method == "GET" and "device-detail" in request.values:
-        return redirect(url_for('auth.device_detail',user=request.values["user_id"],device=request.values["device_id"]))
+    # if request.method == "GET" and "device-detail" in request.values:
+    #     return redirect(url_for('auth.device_detail',user=request.values["user_id"],device=request.values["device_id"]))
     
-    if "add-device" in request.values:
-        return redirect(url_for('auth.device_create',system_id=system_id),code=307)
-    elif "request-accept" in request.values:
-        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
+    # if "add-device" in request.values:
+    #     return redirect(url_for('auth.device_create',system_id=system_id),code=307)
+    # elif "request-accept" in request.values:
+    #     delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
 
-        user = User.query.filter_by(id=request.values["request_user_id"]).first()
-        system=System.query.filter_by(id=system_id).first()
-        system.users.append(user)
-        db.session.add(system)
-        db.session.add(user)
-        db.session.commit()
+    #     user = User.query.filter_by(id=request.values["request_user_id"]).first()
+    #     system=System.query.filter_by(id=system_id).first()
+    #     system.users.append(user)
+    #     db.session.add(system)
+    #     db.session.add(user)
+    #     db.session.commit()
 
-    elif "request-decline" in request.values:
-        delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
+    # elif "request-decline" in request.values:
+    #     delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
 
     system=System.query.get_or_404(system_id)
+    if current_user not in system.users and current_user.role != "admin":
+        abort(403)
+
     devices = Device.query.filter_by(system=system.id).all()
     device_types = [DeviceType.query.filter_by(id=device.device_type_id).first()  for device in devices]
     parameters_of_devices = [device_type.parameters for  device_type in device_types]
