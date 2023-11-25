@@ -183,35 +183,24 @@ def home():
 
 @auth.route("/systems/",methods=['GET', 'POST'])
 def systems():
-    if request.method == 'POST':
-        #add system button
-        if 'add-system-button' in request.values:
-            # The 'add-system-button' button was clicked
-            # Handle the logic for creating a system here
-            return redirect(url_for('auth.system_create'))
-        if request.method == 'POST' and 'system-button-detail' in request.values:
-            return redirect(url_for('auth.system_detail',system_id=request.values["system_id"]))
-        elif request.method == 'POST' and "system-button-request" in request.values:
-            # system = System.query.filter_by(id=request.values["system_id"])
-            current_user.request_system.append(System.query.filter_by(id=request.values["system_id"]).first())
-            db.session.add(current_user)
-            db.session.commit()
+    if request.method == 'POST' and "system-button-request" in request.values:
+        # system = System.query.filter_by(id=request.values["system_id"])
+        current_user.request_system.append(System.query.filter_by(id=request.values["system_id"]).first())
+        db.session.add(current_user)
+        db.session.commit()
 
-    systems = [
-        {"name": "System1", "id": 1, "kpis": [{"name" : "teplota", "state" : "OK"},{"name" : "vlhkost", "state" : "KO"}],"button":"detail"},
-        {"name": "System2", "id" : 2,"kpis": [{"name" : "rychlost", "state" : "KO"}],"button":"pozadat o pristup"},
-    ]
+    systems = []
     systems_in_db =  System.query.all()
     for i in systems_in_db:
         system_privilages = False
         if(current_user.is_authenticated and (current_user.id == i.system_manager or i in current_user.used_systems or current_user.role == "admin" or current_user.role == "broker")):
             system_privilages = True
         if system_privilages:
-            button = "detail"
+            button = "Detail"
         elif current_user in i.users_requesting:
-            button = "request pending"
+            button = "Request pending"
         else:
-            button = "request system use"
+            button = "Request system use"
         system_state = system_all_ok(i.id)
         systems.append({"name": i.name, "id": i.id,
                         "button": button, "state":system_state,"owner": True if system_privilages and i.system_manager == current_user.id else False})
@@ -221,7 +210,7 @@ def systems():
 @auth.route("/systems/<int:system_id>/delete/",methods=['GET', 'POST'])
 @login_required
 def system_delete(system_id):
-    system = System.query.get_or_404(id=system_id)
+    system = System.query.filter_by(id=system_id).first()
 
     if current_user.role != "admin" and current_user.id != system.system_manager:
         abort(403)
@@ -261,11 +250,14 @@ def system_detail(system_id):
         values_of_devices.append(values)
     
     kpis = Kpi.query.filter_by(system=system_id).all()
+    parameters = Parameter.query.all()
+    parameters_of_kpis = [parameters[kpi.parameter_id - 1] for kpi in kpis]
+    
         #list of kpis for each parameter
     kpis_of_devices = [[Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters] for parameters in parameters_of_devices]
     kpis_states = [get_kpi_states(values,kpis) for values,kpis in zip(values_of_devices,kpis_of_devices)]
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
-                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis)
+                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=zip(kpis, parameters_of_kpis))
 
 @auth.route("/systems/<int:system_id>/kpi/<int:kpi_id>/delete/",methods=['GET', 'POST'])
 @login_required
@@ -343,7 +335,6 @@ def device_create(system_id, device_id = None):
         else:
             device.name = form.device_name.data
             device.description = form.device_description.data
-            device.device_type_id = form.device_type.data
 
         db.session.commit()
         return redirect(url_for('auth.system_detail',system_id=system_id))
@@ -352,6 +343,7 @@ def device_create(system_id, device_id = None):
         form.device_name.data = device.name
         form.device_description.data = device.description
         form.device_type.data = device.device_type_id
+        form.device_type.flags.disabled = True
         title = f"Edit device {device_id}"
 
 

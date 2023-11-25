@@ -26,16 +26,16 @@
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <form class="d-grid gap-2 d-md-flex justify-content-md-end" method="POST" action="/systems/{{ system.id }}">
                                 <input type="hidden" name="system_id" value="{{ system.id }}">
-                                {% if system.button == "detail" %}
-                                    <button class="btn btn-primary" type="submit" name="system-button-detail" >{{ system.button }} </button>
-                                {% elif system.button == "request system use" %}
+                                {% if system.button == "Detail" %}
+                                    <a class="btn btn-primary" href="/systems/{{system.id}}/">{{system.button}}</a>
+                                {% elif system.button == "Request system use" %}
                                     <button class="btn btn-warning" type="submit" name="system-button-request" >{{ system.button }} </button>
                                 {% else %}
                                     <button class="btn btn-warning" type="button" name="system-button-request" >{{ system.button }} </button>
                                 {% endif %}
                             </form>
                             <form class="d-grid gap-2 d-md-flex justify-content-md-end" method="POST">
-                                {% if system.owner == True %}
+                                {% if system.owner == True or current_user.role == "admin" %}
                                     <a class="btn btn-danger" href="/systems/{{system.id}}/delete/">Delete</a>
                                 {% endif %}
                             </form>
@@ -47,9 +47,9 @@
             {% endfor %}
         </div>
         {% if current_user.is_authenticated %}
-        <form class="d-grid gap-2 d-md-flex justify-content-md-end mt-3" method="POST">
-            <button class="btn btn-secondary" type="submit" name="add-system-button">Create system</button>
-        </form>    
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+            <a class="btn btn-secondary" href="/systems/create">Create system</a>
+        </div>    
         {% endif %}
     </div>
 </div>
