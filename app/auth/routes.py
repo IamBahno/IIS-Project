@@ -192,10 +192,7 @@ def systems():
             db.session.add(current_user)
             db.session.commit()
 
-    systems = [
-        {"name": "System1", "id": 1, "kpis": [{"name" : "teplota", "state" : "OK"},{"name" : "vlhkost", "state" : "KO"}],"button":"detail"},
-        {"name": "System2", "id" : 2,"kpis": [{"name" : "rychlost", "state" : "KO"}],"button":"pozadat o pristup"},
-    ]
+    systems = []
     systems_in_db =  System.query.all()
     for i in systems_in_db:
         system_privilages = False
