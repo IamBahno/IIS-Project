@@ -4,8 +4,8 @@ from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField
-from wtforms.validators import DataRequired, ValidationError
+from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField, FloatField
+from wtforms.validators import DataRequired, ValidationError, Optional
 from is_safe_url import is_safe_url
 
 def UsernameUnique(form, field):
@@ -39,7 +39,29 @@ class RegisterForm(FlaskForm):
         return False
 
 class KPIEditForm(FlaskForm):
-    pass
+    kpi_name = StringField("Name*", validators=[DataRequired()])
+    kpi_description = TextAreaField("Description")
+    parameter = SelectField("Parameter*", validators=[DataRequired()])
+    lower_limit = FloatField("Lower limit", validators=[Optional()])
+    upper_limit = FloatField("Upper limit", validators=[Optional()])
+    submit = SubmitField("Save")
+
+    def validate(self, extra_validators=None):
+        valid = super(KPIEditForm, self).validate(extra_validators)
+        if not valid:
+            return False
+
+        if self.lower_limit.data == None and self.upper_limit.data == None:
+            self.lower_limit.errors.append("At least one limit has to be specified.")
+            self.upper_limit.errors.append("At least one limit has to be specified.")
+            return False
+
+        if self.lower_limit.data != None and self.upper_limit.data != None and self.lower_limit.data > self.upper_limit.data:
+            self.lower_limit.errors.append("The lower limit cannot be higher than the upper limit.")
+            self.upper_limit.errors.append("The upper limit cannot be lower than the lower limit.")
+            return False
+
+        return True
 
 class LoginForm(FlaskForm):
     #todo limit field lengths?
@@ -164,8 +186,9 @@ def systems():
             db.session.commit()
         elif request.method == 'POST' and "system-button-delete" in request.values:
             system = System.query.filter_by(id=request.values["system_id"]).first()
-            db.session.delete(system)
-            db.session.commit()
+            if(current_user.role == "admin" or current_user.id == system.system_manager):
+                db.session.delete(system)
+                db.session.commit()
                 
 
     systems = [
@@ -226,6 +249,26 @@ def system_detail(system_id):
     kpis_states = [get_kpi_states(values,kpis) for values,kpis in zip(values_of_devices,kpis_of_devices)]
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
                            values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis)
+
+@auth.route("/systems/<int:system_id>/kpi_delete/<int:kpi_id>/",methods=['GET', 'POST'])
+@login_required
+def kpi_delete(system_id, kpi_id):
+    system = System.query.filter_by(id=system_id).first()
+    if(current_user.role == "admin" or current_user.id == system.system_manager):
+        kpi = Kpi.query.filter_by(id=kpi_id).first()
+        db.session.delete(kpi)
+        db.session.commit()
+    return redirect(url_for('auth.system_detail',system_id=system_id),code=307)
+
+@auth.route("/systems/<int:system_id>/device_delete/<int:device_id>/",methods=['GET', 'POST'])
+@login_required
+def device_delete(system_id, device_id):
+    system = System.query.filter_by(id=system_id).first()
+    if(current_user.role == "admin" or current_user.id == system.system_manager):
+        device = Device.query.filter_by(id=device_id).first()
+        db.session.delete(device)
+        db.session.commit()
+    return redirect(url_for('auth.system_detail',system_id=system_id),code=307)
 
 
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/",methods=['GET', 'POST'])
@@ -289,10 +332,9 @@ def system_create(system_id = None):
             #todo check
             system.name = form.system_name.data
             system.description = form.system_description.data
-        try:
-            db.session.commit()
-        except Exception as e:
-            print(e)
+
+        db.session.commit()
+
         return redirect(url_for('auth.system_detail', system_id = system.id))
     elif system_id and not form.is_submitted():
         form.system_name_edit.data = system.name
@@ -303,21 +345,44 @@ def system_create(system_id = None):
     return render_template('system_create.html', form=form, title=title)
 
 @auth.route("/systems/<int:system_id>/kpi/create/",methods=['GET','POST'])
+@auth.route("/systems/<int:system_id>/kpi/<int:kpi_id>/edit/",methods=['GET', 'POST'])
 @login_required
-def kpi_create(system_id):
+def kpi_create(system_id, kpi_id = None):
     form = KPIEditForm()
-    title = "Create KPI"
-    if form.validate_on_submit():
-        lower_limit = float(request.values["lower_limit"]) if request.values["lower_limit"] != "" else None
-        upper_limit = float(request.values["upper_limit"]) if request.values["upper_limit"] != "" else None
-        kpi = Kpi(name=request.values["kpi_name"],description=request.values["kpi_description"],system=system_id,
-                  parameter_id=int(request.values['parameter']),lower_limit=lower_limit,upper_limit=upper_limit,creater=current_user.id)
-        db.session.add(kpi)
-        db.session.commit()
-        return redirect(f'/systems/{system_id}')
-
     parameters = parameters_of_system(system_id)
-    return render_template('kpi_create.html',parameters=parameters)
+    form.parameter.choices = [(p.id, p.name) for p in parameters]
+    title = "Create KPI"
+
+    system = System.query.get_or_404(system_id)
+
+    if kpi_id:
+        kpi = Kpi.query.get_or_404(kpi_id)
+
+    if form.validate_on_submit():
+        if not kpi_id:
+            kpi = Kpi(name=form.kpi_name.data,description=form.kpi_description.data,system=system_id,
+                  parameter_id=form.parameter.data,lower_limit=form.lower_limit.data,upper_limit=form.upper_limit.data,creater=current_user.id)
+            db.session.add(kpi)
+        else:
+            kpi.name = form.kpi_name.data
+            kpi.description = form.kpi_description.data
+            kpi.parameter = form.parameter.data
+            kpi.lower_limit = form.lower_limit.data
+            kpi.upper_limit = form.upper_limit.data
+
+        db.session.commit()
+
+        return redirect(f'/systems/{system_id}/')
+
+    elif kpi_id and not form.is_submitted():
+        form.name.data = kpi.name
+        form.name.description = kpi.description
+        form.name.parameter = kpi.parameter
+        form.name.lower_limit = kpi.lower_limit
+        form.name.upper_limit = kpi.upper_limit
+        title = f"Edit KPI {kpi_id}"
+
+    return render_template('kpi_create.html', form=form)
 
 
 # @auth.route("/test",methods=['GET', 'POST'])

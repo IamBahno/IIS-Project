@@ -1,25 +1,55 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container">
-    <form method="POST">
-        <label for="kpi_name">Name:</label>
-        <input type="text" class="form-control" id="kpi_name" name="kpi_name">
-        <label for="kpi_description">Description:</label>
-        <input type="text" class="form-control" id="kpi_description" name="kpi_description">
-
-        <label for="parameter">Parameter:</label>
-        <select class="form-select" type="parameter" id="parameter" name="parameter">
-            {% for parameter in parameters %}
-                <option value={{parameter.id}} selected>{{parameter.name}}</option>            
-            {% endfor %}
-        </select>
-
-        <label for="lower_limit">Lower limit:</label>
-        <input type="text" class="form-control" id="lower_limit" name="lower_limit">
-        <label for="upper_limit">Upper limit</label>
-        <input type="text" class="form-control" id="upper_limit" name="upper_limit">
-        <label for="create-kpi">Create KPI</label>
-        <input type="submit" class="form-control" name="create-kpi">
-    </form>
-</div>
+<form method="POST" class="container-sm" style="max-width:768px" novalidate>
+    {{form.hidden_tag()}}
+    <h2>{{title}}</h2>
+    <div class="form-floating mb-3">
+        {{form.kpi_name(class="form-control" + (" is-invalid" if 'kpi_name' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+        {{form.kpi_name.label}}
+        {% if 'kpi_name' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['kpi_name'][0]}}</div>
+        {% endif %}
+    </div>
+    <div class="form-floating mb-3">
+        {{form.kpi_description(class="form-control", placeholder="", style="min-height:150px")}}
+        {{form.kpi_description.label}}
+        {% if 'kpi_description' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['kpi_description'][0]}}</div>
+        {% endif %}
+    </div>
+    <div class="form-floating mb-3">
+        {{form.parameter(class="form-control" + (" is-invalid" if 'parameter' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+        {{form.parameter.label}}
+        {% if 'parameter' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['parameter'][0]}}</div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-floating mb-3">
+                {{form.lower_limit(class="form-control" + (" is-invalid" if 'lower_limit' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+                {{form.lower_limit.label}}
+                {% if 'lower_limit' in form.errors %}
+                <div class="invalid-feedback">{{form.errors['lower_limit'][0]}}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-floating mb-3">
+                {{form.upper_limit(class="form-control" + (" is-invalid" if 'upper_limit' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+                {{form.upper_limit.label}}
+                {% if 'upper_limit' in form.errors %}
+                <div class="invalid-feedback">{{form.errors['upper_limit'][0]}}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                {{form.submit(class="btn btn-primary")}}
+            </div>
+        </div>
+    </div>
+</form>
 {% endblock content %}
