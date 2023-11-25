@@ -163,9 +163,10 @@ def systems():
             db.session.add(current_user)
             db.session.commit()
         elif request.method == 'POST' and "system-button-delete" in request.values:
-            system = System.query.filter_by(id=request.values["system_id"]).first()
-            db.session.delete(system)
-            db.session.commit()
+            if(1): # TODO validate user
+                system = System.query.filter_by(id=request.values["system_id"]).first()
+                db.session.delete(system)
+                db.session.commit()
                 
 
     systems = [
@@ -224,6 +225,24 @@ def system_detail(system_id):
     kpis_states = [get_kpi_states(values,kpis) for values,kpis in zip(values_of_devices,kpis_of_devices)]
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
                            values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis)
+
+@auth.route("/systems/<int:system_id>/kpi_delete/<int:kpi_id>/",methods=['GET', 'POST'])
+@login_required
+def kpi_delete(system_id, kpi_id):
+    if(1): # TODO validate user
+        kpi = Kpi.query.filter_by(id=kpi_id).first()
+        db.session.delete(kpi)
+        db.session.commit()
+    return redirect(url_for('auth.system_detail',system_id=system_id),code=307)
+
+@auth.route("/systems/<int:system_id>/device_delete/<int:device_id>/",methods=['GET', 'POST'])
+@login_required
+def device_delete(system_id, device_id):
+    if(1): # TODO validate user
+        device = Device.query.filter_by(id=device_id).first()
+        db.session.delete(device)
+        db.session.commit()
+    return redirect(url_for('auth.system_detail',system_id=system_id),code=307)
 
 
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/",methods=['GET', 'POST'])
