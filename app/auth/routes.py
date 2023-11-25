@@ -384,6 +384,15 @@ def kpi_create(system_id, kpi_id = None):
 
     return render_template('kpi_create.html', form=form)
 
+@auth.route("/devices_&_parameters/",methods=['GET','POST'])
+def manage_devices_and_parameters():
+    if not current_user.is_authenticated or  current_user.role != "admin":
+        return current_app.login_manager.unauthorized()
+    print(current_user.role)
+    device_types = DeviceType.query.all()
+
+    return "<p>aaaaaaaaaaa</p>"
+
 
 # @auth.route("/test",methods=['GET', 'POST'])
 # @login_required

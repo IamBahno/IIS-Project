@@ -27,6 +27,12 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav">
+                    {% if current_user.role == "admin" %}
+                        <li class="nav-item">
+                            <a href="/devices_&_parameters" class="nav-link">Manage devices</a>
+                        </li>
+                    {% endif %}
+
                     {% if not current_user.is_authenticated %}
                     <li class="nav-item">
                         <a href="/login" class="nav-link {% if request.path == "/login" %}active{% endif %}">Login</a>
