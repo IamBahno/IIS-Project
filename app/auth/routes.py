@@ -110,10 +110,15 @@ class DeviceEditForm(FlaskForm):
     device_type = SelectField("Type*", validators=[DataRequired()], coerce=int)
     submit = SubmitField("Save")
     
+class DeviceTypeEditForm(FlaskForm):
+    device_type_name = StringField("Name*", validators = [DataRequired()])
+    submit = SubmitField("Save")
 
 auth = Blueprint('auth', __name__)
 
-#TODO duplikavany parametry
+#TODO kdyz nejse smazat parameter neco vypsat
+#TODO device_type edit
+#TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
 #TODO pridat kpi do systemu, vsechny kpi projit, pokud jes aspon jedno "KO" hodit tam ko, nebo tak neco
 #TODO kpi delete
 #TODO nekam vypisovat veci jako kpi jmneo popis etc.
@@ -436,9 +441,48 @@ def manage_devices_and_parameters():
         abort(403)
     device_types = DeviceType.query.all()
     parameters = Parameter.query.all()
-    for parameter in parameters:
-        print(parameter.id)
     return render_template('devicetypes_parameters.html', device_types=device_types,parameters = parameters)
+
+@auth.route("/device_types/<int:device_type_id>/edit",methods=['GET','POST'])
+def edit_device_type(device_type_id):
+    if not current_user.is_authenticated or  current_user.role != "admin":
+        abort(403)
+    form = DeviceTypeEditForm()
+    if form.validate_on_submit(form):
+        device_type = DeviceType.query.filter_by(id=device_type_id).first()
+        device_type.name = form.device_type_name.data
+        db.session.commit()
+        title = f"Edit device {device_type_id}"
+    else:
+        pass
+    return "<p>aaaaaaaaaa</p>"
+
+@auth.route("/parameters/<int:parameter_id>/edit",methods=['GET','POST'])
+def deleter_edit(parameter_id):
+    if not current_user.is_authenticated or  current_user.role != "admin":
+        abort(403)
+    return redirect('/devices_&_parameters/')
+
+@auth.route("/device_types/<int:device_type_id>/delete",methods=['GET','POST'])
+def delete_device_type(device_type_id):
+    if not current_user.is_authenticated or  current_user.role != "admin":
+        abort(403)
+    device_type = DeviceType.query.get_or_404(device_type_id)
+    db.session.delete(device_type)
+    db.session.commit()
+    return render_template("devicetypes_parameters.html")
+
+@auth.route("/parameters/<int:parameter_id>/delete",methods=['GET','POST'])
+def deleter_parameter(parameter_id):
+    if not current_user.is_authenticated or  current_user.role != "admin":
+        abort(403)
+    parameter = Parameter.query.get_or_404(parameter_id)
+    if (parameter.device_types != []):
+        return redirect(url_for("auth.manage_devices_and_parameters"),code=307)
+    db.session.delete(parameter)
+    db.session.commit()
+    return redirect('/devices_&_parameters/')
+
 
 
 # @auth.route("/test",methods=['GET', 'POST'])
