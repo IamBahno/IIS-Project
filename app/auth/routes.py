@@ -184,12 +184,6 @@ def systems():
             current_user.request_system.append(System.query.filter_by(id=request.values["system_id"]).first())
             db.session.add(current_user)
             db.session.commit()
-        elif request.method == 'POST' and "system-button-delete" in request.values:
-            system = System.query.filter_by(id=request.values["system_id"]).first()
-            if(current_user.role == "admin" or current_user.id == system.system_manager):
-                db.session.delete(system)
-                db.session.commit()
-                
 
     systems = [
         {"name": "System1", "id": 1, "kpis": [{"name" : "teplota", "state" : "OK"},{"name" : "vlhkost", "state" : "KO"}],"button":"detail"},
@@ -212,6 +206,14 @@ def systems():
 
     return render_template('systems.html',systems=systems, title="Systems")
 
+@auth.route("/systems/<int:system_id>/delete/",methods=['GET', 'POST'])
+@login_required
+def system_delete(system_id):
+    system = System.query.get_or_404(id=system_id)
+    if(current_user.role == "admin" or current_user.id == system.system_manager):
+        db.session.delete(system)
+        db.session.commit()
+    return redirect(url_for('auth.systems',system_id=system_id))
 
 @auth.route("/systems/<int:system_id>/",methods=['GET', 'POST'])
 @login_required
