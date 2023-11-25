@@ -1,17 +1,24 @@
 {% extends "layout.html" %}
 {% block content %}
-    <form method="POST" class="container-sm" style="max-width:768px">
+    <form method="POST" class="container-sm" style="max-width:768px" novalidate>
+        {{form.hidden_tag()}}
         <h2>Login</h2>
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="login-username" placeholder="" name="login-username">
-            <label for="login-username">Username</label>
+                {{form.username(class="form-control" + (" is-invalid" if 'username' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+                {{form.username.label}}
+                {% if 'username' in form.errors %}
+                <div class="invalid-feedback">{{form.errors['username'][0]}}</div>
+                {% endif %}
         </div>
         <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="login-password" placeholder="" name="login-password">
-            <label for="login-password">Password</label>
+                {{form.password(class="form-control" + (" is-invalid" if 'password' in form.errors else ""), placeholder="", oninput="reset_validation(this)")}}
+                {{form.password.label}}
+                {% if 'password' in form.errors %}
+                <div class="invalid-feedback">{{form.errors['password'][0]}}</div>
+                {% endif %}
         </div>
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button type="submit" class="btn btn-primary">Sign in</button>
+            {{form.submit(class="btn btn-primary")}}
         </div>
     </form>
 {% endblock %}

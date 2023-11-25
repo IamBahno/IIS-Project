@@ -1,17 +1,25 @@
 {% extends "layout.html" %}
 {% block content %}
-<form method="POST" class="container-sm" style="max-width:768px">
+<form method="POST" class="container-sm" style="max-width:768px" novalidate>
+    {{form.hidden_tag()}}
+    {{form.system_name_edit()}}
     <h2>Create system</h2>
     <div class="form-floating mb-3">
-        <input type="text" class="form-control" id="system-name" placeholder="" name="system-name">
-        <label for="system-name">Name</label>
+        {{form.system_name(class="form-control" + (" is-invalid" if 'system_name' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+        {{form.system_name.label}}
+        {% if 'system_name' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['system_name'][0]}}</div>
+        {% endif %}
     </div>
     <div class="form-floating mb-3">
-        <textarea type="text" class="form-control" id="system-description" placeholder="" name="system-description" style="min-height:150px"></textarea>
-        <label for="system-description">Description</label>
+        {{form.system_description(class="form-control", placeholder="", style="min-height:150px")}}
+        {{form.system_description.label}}
+        {% if 'system_description' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['system_description'][0]}}</div>
+        {% endif %}
     </div>
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <button type="submit" name="create-system" class="btn btn-primary">Create</button>
+        {{form.submit(class="btn btn-primary")}}
     </div>
 </form>
 {% endblock content %}

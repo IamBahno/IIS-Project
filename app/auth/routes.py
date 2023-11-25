@@ -3,6 +3,82 @@ from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,dele
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
+from flask_wtf import FlaskForm
+from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField
+from wtforms.validators import DataRequired, ValidationError
+from is_safe_url import is_safe_url
+
+def UsernameUnique(form, field):
+    user = User.query.filter_by(username=field.data).first()
+    if user:
+        raise ValidationError("This username is already taken")
+
+def SystemUnique(form, field):
+    system = System.query.filter_by(name=field.data).first()
+    if system:
+        raise ValidationError("A system with this name already exists.")
+
+class RegisterForm(FlaskForm):
+    #todo limit field lengths?
+    username = StringField("Username*", validators=[DataRequired(), UsernameUnique])
+    first_name = StringField("First name*", validators=[DataRequired()])
+    last_name = StringField("Last name*", validators=[DataRequired()])
+    password = PasswordField("Password*", validators=[DataRequired()])
+    passwordConfirm = PasswordField("Confirm password*", validators=[DataRequired()])
+    submit = SubmitField("Register")
+
+    def validate(self, extra_validators=None):
+        valid = super(RegisterForm, self).validate(extra_validators)
+        if not valid:
+            return False
+
+        if self.password.data == self.passwordConfirm.data:
+            return True
+
+        self.passwordConfirm.errors.append('Passwords do not match.')
+        return False
+
+class LoginForm(FlaskForm):
+    #todo limit field lengths?
+    username = StringField("Username*", validators=[DataRequired()])
+    password = PasswordField("Password*", validators=[DataRequired()])
+    submit = SubmitField("Log in")
+
+    def validate(self, extra_validators=None):
+        valid = super(LoginForm, self).validate(extra_validators)
+        if not valid:
+            return False
+
+        user = User.query.filter_by(username=self.username.data).first()
+
+        if user and bcrypt.check_password_hash(user.hashed_password,self.password.data):
+            return True
+
+        self.password.errors.append('Invalid combination of username and password')
+        return False
+
+class SystemEditForm(FlaskForm):
+    #todo limit field lengths?
+    system_name_edit = HiddenField()
+    system_name = StringField("System name*", validators=[DataRequired()])
+    system_description = TextAreaField("System description")
+    submit = SubmitField("Save")
+
+    def validate(self, extra_validators=None):
+        valid = super(SystemEditForm, self).validate(extra_validators)
+        if not valid:
+            return False
+
+        #todo check
+        if self.system_name.data != self.system_name_edit.data:
+            try:
+                SystemUnique(self, self.system_name)
+            except ValidationError as e:
+                self.system_name.errors.append(e)
+                return False
+
+        return True
+
 
 auth = Blueprint('auth', __name__)
 
@@ -11,7 +87,7 @@ auth = Blueprint('auth', __name__)
 #TODO nekam vypisovat veci jako kpi jmneo popis etc.
 #TODO u vytvareni kpi, udelat nejak ze musi byt nastavenej aspon jedna limit, kontrolovat ze jedna mensi hodnota je oprvdu mensi, regexi na zadavani cisel
 #TODO delete device v system deatilu nebo device detailu
-#TODO oddelat ze v register formulari si vybiras role, (mozna pridelaat ze admin muze davat ostatnim adim role)
+#// TODO oddelat ze v register formulari si vybiras role, (mozna pridelaat ze admin muze davat ostatnim adim role)
 #TODO udelat edit ke vsemu (edit jmena osoby,kpi hodnoty, jmena device etc.....) bud predelat create page aby meli parameter create/edit 
 #                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
 #TODO vypisovat vsude nejakej rozumnej header (treaba kdyz vytvaris device aby byl tam byl vypsanej system nebo tak neco )
@@ -19,64 +95,56 @@ auth = Blueprint('auth', __name__)
 #TODO zajistit aby pri zadani neplatny hodnoty jako unikatni jmeno atd. nespadl program
 #TODO oznacit poviny pole, aby program nepadal pri nezadani tech nepoviny atd...
 
-@auth.route("/login", methods=['GET', 'POST'])
+@auth.route("/login/", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for(auth.home))
-    if request.method == 'POST':
-        username = request.values['login-username']
-        password = request.values['login-password']
-        user = User.query.filter_by(username=username).first()
-        if user and bcrypt.check_password_hash(user.hashed_password,password):
-            flash('Login successful', 'success')
-            login_user(user)
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        flash('Login successful', 'success')
+        login_user(user)
+        next = request.args.get('next')
+        if next == "" or next == None or not is_safe_url(next, request.host):
             return redirect(url_for('auth.home'))
 
-        else:
-            flash('Login failed. Please check your credentials.', 'danger')
-    return render_template('login.html', title='Login')
+        return redirect(next)
+    return render_template('login.html', title='Login', form=form)
 
-@auth.route("/logout", methods=['GET', 'POST'])
+@auth.route("/logout/", methods=['GET', 'POST'])
 def logout():
     logout_user()
     return redirect(url_for('auth.home'))
 
-@auth.route("/register", methods=['GET', 'POST'])
+@auth.route("/register/", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for(auth.home))
-    if request.method == 'POST':
-#         # Registration form
-        username = request.values['username']
-        password = request.values['password']
-        first_name = request.values['first_name']
-        last_name = request.values['last_name']
-        role = request.values['role']
 
+
+    form = RegisterForm()
+    if form.validate_on_submit():
+#         # Registration form
 
         # Create a new User record and add it to the database
-        user = User(username=username,first_name=first_name,last_name=last_name,role=role,hashed_password = bcrypt.generate_password_hash(password).decode('utf-8'))
+        user = User(username=form.username.data,first_name=form.first_name.data,last_name=form.last_name.data,role="user",hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8'))
         db.session.add(user)
-
-        try:
-            db.session.commit()
-        except Exception:
-            flash('User already exists', 'error')
-            return '', 400
-
-        flash('User registered successfully', 'success')
+        db.session.commit()
 
         login_user(user)
 
         return redirect(url_for('auth.home'))
-    return render_template('register.html', title='Register')
+
+    return render_template('register.html', title='Register', form=form)
 
 @auth.route("/")
 @auth.route("/home")
 def home():
     return redirect(url_for('auth.systems'))
 
-@auth.route("/systems",methods=['GET', 'POST'])
+@auth.route("/systems/",methods=['GET', 'POST'])
 def systems():
     if request.method == 'POST':
         #add system button
@@ -117,7 +185,8 @@ def systems():
     return render_template('systems.html',systems=systems)
 
 
-@auth.route("/systems/<system_id>",methods=['GET', 'POST'])
+@auth.route("/systems/<system_id>/",methods=['GET', 'POST'])
+@login_required
 def system_detail(system_id):
     if request.method == "GET" and "device-detail" in request.values:
         return redirect(url_for('auth.device_detail',user=request.values["user_id"],device=request.values["device_id"]))
@@ -154,7 +223,7 @@ def system_detail(system_id):
                            values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis)
 
 
-@auth.route("/systems/<system_id>/<device_id>",methods=['GET', 'POST'])
+@auth.route("/systems/<system_id>/<device_id>/",methods=['GET', 'POST'])
 def device_detail(system_id, device_id):
     if "add-value" in request.values:
         value_value = request.values["value"]
@@ -178,8 +247,9 @@ def device_detail(system_id, device_id):
     return render_template('device_detail.html', device_id=int(device_id), system_id=int(system_id),user=current_user,values=values,
                            parameters=parameters,kpis=kpis,kpi_parameters_states=kpi_states,default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip)
     
-@auth.route("/systems/<system_id>/create",methods=['GET', 'POST'])
+@auth.route("/systems/<system_id>/create/",methods=['GET', 'POST'])
 def device_create(system_id):
+    #todo wtforms convert
     if "create-device" in request.values:
         device = Device(name = request.values["device-name"],description=request.values["device-description"],system=int(system_id),device_manager=current_user.id,device_type_id=request.values.get("device-type"))
         db.session.add(device)
@@ -195,27 +265,28 @@ def device_create(system_id):
     return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=int(system_id))
 
 
-@auth.route("/systems/create",methods=['GET', 'POST'])
+@auth.route("/systems/create/",methods=['GET', 'POST'])
+@login_required
 def system_create():
-    if request.method == 'POST':
-        #add system button
-        if 'create-system' in request.values:
-            if not current_user.is_authenticated:
-                flash("Log-in first")
-                print("Log-in first")
-            system_name = request.values['system-name']
-            system_description = request.values['system-description']
-            if(System.query.filter_by(name=system_name).first() != None):
-                print("System with that name already exists")
-            #zjistit jestli uz neni system toho jmena
-            system = System(name=system_name,description=system_description,system_manager=current_user.id)
-            db.session.add(system)
-            db.session.commit()
-            print("system created")
-            return redirect(url_for('auth.systems'))
-    return render_template('system_create.html')
+    form = SystemEditForm()
 
-@auth.route("/systems/<system_id>/kpi/create",methods=['GET','POST'])
+    if form.validate_on_submit():
+        #add system button
+        if form.system_name_edit.data == "":
+            system = System(name=form.system_name.data,description=form.system_description.data,system_manager=current_user.id)
+            db.session.add(system)
+        else:
+            #todo check
+            system = System.query.filter_by(name=form.system_name_edit.name).first()
+            system.name = form.system_name.data
+            system.description = form.system_description.data
+        db.session.commit()
+        return redirect(url_for('auth.system_detail', system_id = system.id))
+
+    return render_template('system_create.html', form=form)
+
+@auth.route("/systems/<system_id>/kpi/create/",methods=['GET','POST'])
+@login_required
 def kpi_create(system_id):
     if "add-kpi-form" in request.values:
         parameters = parameters_of_system(system_id)
