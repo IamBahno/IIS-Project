@@ -185,8 +185,8 @@ def systems():
             db.session.add(current_user)
             db.session.commit()
         elif request.method == 'POST' and "system-button-delete" in request.values:
-            if(1): # TODO validate user
-                system = System.query.filter_by(id=request.values["system_id"]).first()
+            system = System.query.filter_by(id=request.values["system_id"]).first()
+            if(current_user.role == "admin" or current_user.id == system.system_manager):
                 db.session.delete(system)
                 db.session.commit()
                 
@@ -251,7 +251,8 @@ def system_detail(system_id):
 @auth.route("/systems/<int:system_id>/kpi_delete/<int:kpi_id>/",methods=['GET', 'POST'])
 @login_required
 def kpi_delete(system_id, kpi_id):
-    if(1): # TODO validate user
+    system = System.query.filter_by(id=system_id).first()
+    if(current_user.role == "admin" or current_user.id == system.system_manager):
         kpi = Kpi.query.filter_by(id=kpi_id).first()
         db.session.delete(kpi)
         db.session.commit()
@@ -260,7 +261,8 @@ def kpi_delete(system_id, kpi_id):
 @auth.route("/systems/<int:system_id>/device_delete/<int:device_id>/",methods=['GET', 'POST'])
 @login_required
 def device_delete(system_id, device_id):
-    if(1): # TODO validate user
+    system = System.query.filter_by(id=system_id).first()
+    if(current_user.role == "admin" or current_user.id == system.system_manager):
         device = Device.query.filter_by(id=device_id).first()
         db.session.delete(device)
         db.session.commit()
