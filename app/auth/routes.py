@@ -316,7 +316,6 @@ def device_detail(system_id, device_id):
 @auth.route("/systems/<int:system_id>/devices/create/",methods=['GET', 'POST'])
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/edit/",methods=['GET', 'POST'])
 def device_create(system_id, device_id = None):
-    #todo wtforms convert
     form = DeviceEditForm()
     device_types = DeviceType.query.all()
     form.device_type.choices = [(d.id, f"{d.name} ({', '.join(p.name for p in d.parameters)})") for d in device_types]

@@ -3,49 +3,34 @@
 <div class="container">
     <h1>Systems</h1>
     <div class="container mt-4">
-        <div class="accordion" id="systemsList">
+        <ul class="list-group">
             {% for system in systems %}
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#system_{{ system.id }}">
-                    {{ system.name }} ({{ system.id }})
-                </button>
-                </h2>
-                <div id="system_{{ system.id }}" class="accordion-collapse collapse" data-bs-parent="#systemsList">
-                    <div class="accordion-body">
-                        <table class="table table-responsive">
-                            <!-- {% for kpis in system.kpis %}
-                            <tr>
-                                <td>{{ kpis.name }}</div>
-                                <td class="{% if kpis.state == "OK" %}text-success{% else %}text-danger{% endif %}">{{ kpis.state }}</div>
-                            </tr>
-                            {% endfor %} -->
-                            {{system.state}}
-                        </table>
-                        {% if current_user.is_authenticated %}
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <form class="d-grid gap-2 d-md-flex justify-content-md-end" method="POST">
-                                <input type="hidden" name="system_id" value="{{ system.id }}">
-                                {% if system.button == "Detail" %}
-                                    <a class="btn btn-primary" href="/systems/{{system.id}}/">{{system.button}}</a>
-                                {% elif system.button == "Request system use" %}
-                                    <button class="btn btn-warning" type="submit" name="system-button-request" >{{ system.button }} </button>
-                                {% else %}
-                                    <button class="btn btn-warning" type="button" name="system-button-request" >{{ system.button }} </button>
-                                {% endif %}
-                            </form>
-                            <form class="d-grid gap-2 d-md-flex justify-content-md-end" method="POST">
-                                {% if system.owner == True or current_user.role == "admin" %}
-                                    <a class="btn btn-danger" href="/systems/{{system.id}}/delete/">Delete</a>
-                                {% endif %}
-                            </form>
-                        </div>
+            <li class="list-group-item d-grid gap-2 d-md-flex justify-content-md-end">
+                <div class="col text-sm-start text-center" style="margin-top:auto;margin-bottom:auto">
+                    {{ system.name }} ({{ system.id }}) <span class="ms-5 {% if system.state == "OK" %}text-success{% else %}text-danger{% endif %}">{{system.state}}</span>
+                </div>
+                {% if current_user.is_authenticated %}
+                <div class="col d-grid gap-2 d-md-flex justify-content-md-end">
+                    <form class="d-grid gap-2 d-md-flex justify-content-md-end" method="POST" action="/systems/{{ system.id }}">
+                        <input type="hidden" name="system_id" value="{{ system.id }}">
+                        {% if system.button == "Detail" %}
+                            <a class="btn btn-primary" href="/systems/{{system.id}}/">{{system.button}}</a>
+                        {% elif system.button == "Request system use" %}
+                            <button class="btn btn-warning" type="submit" name="system-button-request" >{{ system.button }} </button>
+                        {% else %}
+                            <button class="btn btn-warning" type="button" name="system-button-request" >{{ system.button }} </button>
+                        {% endif %}
+                    </form>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        {% if system.owner == True or current_user.role == "admin" %}
+                        <a class="btn btn-danger" href="/systems/{{system.id}}/delete/">Delete</a>
                         {% endif %}
                     </div>
                 </div>
-            </div>
+                {% endif %}
+            </li>
             {% endfor %}
-        </div>
+        </ul>
         {% if current_user.is_authenticated %}
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
             <a class="btn btn-secondary" href="/systems/create">Create system</a>
