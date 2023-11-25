@@ -2,5 +2,7 @@ Flask==3.0
 Flask-SQLAlchemy==3.1.1
 Flask-Bcrypt==1.0.1
 pytest==7.4.3
-Flask-Login
-psycopg2-binary
+Flask-Login==0.6.3
+psycopg2-binary==2.9.9
+flask_wtf==1.2.1
+is_safe_url==1.0
