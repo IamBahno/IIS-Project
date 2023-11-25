@@ -20,7 +20,7 @@ def SystemUnique(form, field):
 
 class RegisterForm(FlaskForm):
     #todo limit field lengths?
-    username = StringField("Username*", validators=[DataRequired(), UsernameUnique])
+    username = StringField("Username*", validators=[DataRequired(), UsernameUnique], render_kw={'autofocus': True})
     first_name = StringField("First name*", validators=[DataRequired()])
     last_name = StringField("Last name*", validators=[DataRequired()])
     password = PasswordField("Password*", validators=[DataRequired()])
@@ -39,7 +39,7 @@ class RegisterForm(FlaskForm):
         return False
 
 class KPIEditForm(FlaskForm):
-    kpi_name = StringField("Name*", validators=[DataRequired()])
+    kpi_name = StringField("Name*", validators=[DataRequired()], render_kw={'autofocus': True})
     kpi_description = TextAreaField("Description")
     parameter = SelectField("Parameter*", validators=[DataRequired()], coerce=int)
     lower_limit = FloatField("Lower limit", validators=[Optional()])
@@ -65,7 +65,7 @@ class KPIEditForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     #todo limit field lengths?
-    username = StringField("Username*", validators=[DataRequired()])
+    username = StringField("Username*", validators=[DataRequired()], render_kw={'autofocus': True})
     password = PasswordField("Password*", validators=[DataRequired()])
     submit = SubmitField("Log in")
 
@@ -85,7 +85,7 @@ class LoginForm(FlaskForm):
 class SystemEditForm(FlaskForm):
     #todo limit field lengths?
     system_name_edit = HiddenField()
-    system_name = StringField("System name*", validators=[DataRequired()])
+    system_name = StringField("System name*", validators=[DataRequired()], render_kw={'autofocus': True})
     system_description = TextAreaField("System description")
     submit = SubmitField("Save")
 
@@ -105,13 +105,13 @@ class SystemEditForm(FlaskForm):
         return True
 
 class DeviceEditForm(FlaskForm):
-    device_name = StringField("Name*", validators = [DataRequired()])
+    device_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
     device_description = TextAreaField("Description")
     device_type = SelectField("Type*", validators=[DataRequired()], coerce=int)
     submit = SubmitField("Save")
     
 class DeviceTypeEditForm(FlaskForm):
-    device_type_name = StringField("Name*", validators = [DataRequired()])
+    device_type_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
     submit = SubmitField("Save")
 
 auth = Blueprint('auth', __name__)
