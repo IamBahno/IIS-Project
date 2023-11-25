@@ -41,7 +41,7 @@ class RegisterForm(FlaskForm):
 class KPIEditForm(FlaskForm):
     kpi_name = StringField("Name*", validators=[DataRequired()])
     kpi_description = TextAreaField("Description")
-    parameter = SelectField("Parameter*", validators=[DataRequired()])
+    parameter = SelectField("Parameter*", validators=[DataRequired()], coerce=int)
     lower_limit = FloatField("Lower limit", validators=[Optional()])
     upper_limit = FloatField("Upper limit", validators=[Optional()])
     submit = SubmitField("Save")
@@ -104,6 +104,12 @@ class SystemEditForm(FlaskForm):
 
         return True
 
+class DeviceEditForm(FlaskForm):
+    device_name = StringField("Name*", validators = [DataRequired()])
+    device_description = TextAreaField("Description")
+    device_type = SelectField("Type*", validators=[DataRequired()], coerce=int)
+    submit = SubmitField("Save")
+    
 
 auth = Blueprint('auth', __name__)
 
@@ -211,7 +217,7 @@ def systems():
 @login_required
 def system_delete(system_id):
     system = System.query.get_or_404(id=system_id)
-    
+
     if current_user.role != "admin" and current_user.id != system.system_manager:
         abort(403)
 
@@ -309,21 +315,42 @@ def device_detail(system_id, device_id):
                            parameters=parameters,kpis=kpis,kpi_parameters_states=kpi_states,default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip)
     
 @auth.route("/systems/<int:system_id>/devices/create/",methods=['GET', 'POST'])
-def device_create(system_id):
+@auth.route("/systems/<int:system_id>/devices/<int:device_id>/edit/",methods=['GET', 'POST'])
+def device_create(system_id, device_id = None):
     #todo wtforms convert
-    if "create-device" in request.values:
-        device = Device(name = request.values["device-name"],description=request.values["device-description"],system=system_id,device_manager=current_user.id,device_type_id=request.values.get("device-type"))
-        db.session.add(device)
+    form = DeviceEditForm()
+    device_types = DeviceType.query.all()
+    form.device_type.choices = [(d.id, f"{d.name} ({', '.join(p.name for p in d.parameters)})") for d in device_types]
+    title = "Create device"
+
+    system = System.query.get_or_404(system_id)
+
+    if current_user.role != "admin" and current_user.id != system.system_manager:
+        abort(403)
+
+    if device_id:
+        device = Device.query.get_or_404(device_id)
+
+    if form.validate_on_submit():
+        if not device_id:
+            device = Device(name = form.device_name.data,description=form.device_description.data, system=system_id,device_manager=current_user.id,device_type_id=form.device_type.data)
+            db.session.add(device)
+        else:
+            device.name = form.device_name.data
+            device.description = form.device_description.data
+            device.device_type_id = form.device_type.data
+
         db.session.commit()
         return redirect(url_for('auth.system_detail',system_id=system_id))
-    device_types = DeviceType.query.all()
-    parameters_of_device_types = {}
-    for device_type in device_types:
-        parameter_names = []
-        for parameter in device_type.parameters:
-            parameter_names.append(parameter.name)
-        parameters_of_device_types[device_type.name] = parameter_names
-    return render_template('device_create.html',device_types=device_types,parameters=parameters_of_device_types,system_id=system_id)
+
+    elif device_id and not form.is_submitted():
+        form.device_name.data = device.name
+        form.device_description.data = device.description
+        form.device_type.data = device.device_type_id
+        title = f"Edit device {device_id}"
+
+
+    return render_template('device_create.html', form=form, title=title)
 
 
 @auth.route("/systems/create/",methods=['GET', 'POST'])
