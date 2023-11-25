@@ -219,7 +219,7 @@ def system_delete(system_id):
 
     db.session.delete(system)
     db.session.commit()
-    return redirect(url_for('auth.systems',system_id=system_id))
+    return redirect(url_for('auth.systems'))
 
 @auth.route("/systems/<int:system_id>/",methods=['GET', 'POST'])
 @login_required
@@ -263,6 +263,61 @@ def system_detail(system_id):
     kpis_states = [get_kpi_states(values,kpis) for values,kpis in zip(values_of_devices,kpis_of_devices)]
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
                            values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=zip(kpis, parameters_of_kpis))
+
+
+@auth.route("/systems/<int:system_id>/request/", methods=['GET', 'POST'])
+@login_required
+def system_request_access(system_id):
+    system = System.query.get_or_404(system_id)
+    
+    if current_user in system.users or current_user.role == "admin":
+        return redirect(url_for('auth.system_detail',system_id=system_id))
+
+    if current_user in system.users_requesting:
+        return redirect(url_for('auth.systems'))
+
+    system.users_requesting.append(current_user)
+
+    db.session.commit()
+
+    return redirect(url_for('auth.systems'))
+
+@auth.route("/systems/<int:system_id>/requests/<int:user_id>/accept/", methods=['GET', 'POST'])
+@login_required
+def system_accept_request(system_id, user_id):
+    system = System.query.get_or_404(system_id)
+    user = User.query.get_or_404(user_id)
+
+    if current_user.id != system.system_manager and current_user.role != "admin":
+        abort(403)
+    
+    if user in system.users or user not in system.users_requesting:
+        return redirect(url_for('auth.system_detail',system_id=system_id))
+
+    delete_system_request(user_id = user_id, system_id = system_id,db = db)
+    user.used_systems.append(system)
+
+    db.session.commit()
+
+    return redirect(url_for('auth.system_detail',system_id=system_id))
+
+@auth.route("/systems/<int:system_id>/requests/<int:user_id>/reject/", methods=['GET', 'POST'])
+@login_required
+def system_reject_request(system_id, user_id):
+    system = System.query.get_or_404(system_id)
+    user = User.query.get_or_404(user_id)
+
+    if current_user.id != system.system_manager and current_user.role != "admin":
+        abort(403)
+    
+    if user in system.users or user not in system.users_requesting:
+        return redirect(url_for('auth.system_detail',system_id=system_id))
+
+    delete_system_request(user_id = user_id, system_id = system_id,db = db)
+
+    db.session.commit()
+
+    return redirect(url_for('auth.system_detail',system_id=system_id))
 
 @auth.route("/systems/<int:system_id>/kpi/<int:kpi_id>/delete/",methods=['GET', 'POST'])
 @login_required

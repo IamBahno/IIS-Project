@@ -5,12 +5,12 @@
     <div class="container mt-4">
         <ul class="list-group">
             {% for system in systems %}
-            <li class="list-group-item d-grid gap-2 d-md-flex justify-content-md-end">
+            <li class="list-group-item d-grid gap-2 d-md-flex justify-content-md-end" style="min-height:60px">
                 <div class="col text-sm-start text-center" style="margin-top:auto;margin-bottom:auto">
                     {{ system.name }} ({{ system.id }}) <span class="ms-5 {% if system.state == "OK" %}text-success{% else %}text-danger{% endif %}">{{system.state}}</span>
                 </div>
                 {% if current_user.is_authenticated %}
-                <div class="col d-grid gap-2 d-md-flex justify-content-md-end">
+                <div class="col d-grid gap-2 d-md-flex justify-content-md-end" style="height:min-content;margin-top:auto;margin-bottom:auto">
                     {% if system.button == "Detail" %}
                         <a class="btn btn-primary" href="/systems/{{system.id}}/">{{system.button}}</a>
                     {% elif system.button == "Request system use" %}

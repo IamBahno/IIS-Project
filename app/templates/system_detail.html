@@ -10,20 +10,8 @@
     <!-- TODO: zadosti o system -->
     {% if system.system_manager == user.id or user.role == "admin" %}
         {% for request in system.users_requesting %}
-            "user: "{{request.username}}" id:"{{request.id}} 
-            <form method="POST">
-                <input type="hidden" name="system_id" value="{{ system.id }}">
-                <input type="hidden" name="request_user_id" value="{{ request.id }}">
-                <button type="submit" name="request-accept">Accept</button>
-            </form>
-
-            <form method="POST">
-                <input type="hidden" name="system_id" value="{{ system.id }}">
-                <input type="hidden" name="request_user_id" value="{{ request.id }}">
-                <button type="submit" name="request-decline">Decline</button>
-            </form>
-            <br>
-
+        <a class="btn btn-success" href="/systems/{{system.id}}/requests/{{request.id}}/accept/">Accept</a>
+        <a class="btn btn-danger" href="/systems/{{system.id}}/requests/{{request.id}}/reject/">Reject</a>
         {% endfor %}
     {% endif %}
 
