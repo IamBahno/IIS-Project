@@ -116,6 +116,8 @@ class DeviceTypeEditForm(FlaskForm):
 
 auth = Blueprint('auth', __name__)
 
+#TODO create parameter device_type
+#TODO moznost aby uzivatel systemu prestal uzivat
 #TODO kdyz nejse smazat parameter neco vypsat
 #TODO device_type edit
 #TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
