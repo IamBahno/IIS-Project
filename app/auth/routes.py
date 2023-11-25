@@ -1,5 +1,5 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for, abort
-from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states
+from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,devicetype_parameter
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
@@ -107,6 +107,7 @@ class SystemEditForm(FlaskForm):
 
 auth = Blueprint('auth', __name__)
 
+#TODO duplikavany parametry
 #TODO pridat kpi do systemu, vsechny kpi projit, pokud jes aspon jedno "KO" hodit tam ko, nebo tak neco
 #TODO kpi delete
 #TODO nekam vypisovat veci jako kpi jmneo popis etc.
@@ -405,11 +406,12 @@ def kpi_create(system_id, kpi_id = None):
 @auth.route("/devices_&_parameters/",methods=['GET','POST'])
 def manage_devices_and_parameters():
     if not current_user.is_authenticated or  current_user.role != "admin":
-        return current_app.login_manager.unauthorized()
-    print(current_user.role)
+        abort(403)
     device_types = DeviceType.query.all()
-
-    return "<p>aaaaaaaaaaa</p>"
+    parameters = Parameter.query.all()
+    for parameter in parameters:
+        print(parameter.id)
+    return render_template('devicetypes_parameters.html', device_types=device_types,parameters = parameters)
 
 
 # @auth.route("/test",methods=['GET', 'POST'])

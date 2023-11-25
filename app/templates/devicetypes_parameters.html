@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+    <ul class="list-group list-group-flush">
+        <h2>Device types:</h2>
+        {% for device_type in device_types %}
+            <li class="list-group-item"><h3>{{device_type.name}}</h3><br>
+                    {% for parameter in device_type.parameters %}
+                        {{parameter.name}} units: {{parameter.unit}} <br>
+                    {% endfor %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- <ul class="list-group list-group-flush">
+        <h2>Paremeters:</h2>
+        {% for parameter in parameters %}
+            <li class="list-group-item">
+                {{parameter.name}} units: {{parameter.unit}} <br>
+            </li>
+        {% endfor %}
+
+    </ul> -->
+{% endblock %}
