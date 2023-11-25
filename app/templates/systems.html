@@ -14,12 +14,13 @@
                 <div id="system_{{ system.id }}" class="accordion-collapse collapse" data-bs-parent="#systemsList">
                     <div class="accordion-body">
                         <table class="table table-responsive">
-                            {% for kpis in system.kpis %}
+                            <!-- {% for kpis in system.kpis %}
                             <tr>
                                 <td>{{ kpis.name }}</div>
                                 <td class="{% if kpis.state == "OK" %}text-success{% else %}text-danger{% endif %}">{{ kpis.state }}</div>
                             </tr>
-                            {% endfor %}
+                            {% endfor %} -->
+                            {{system.state}}
                         </table>
                         {% if current_user.is_authenticated %}
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
