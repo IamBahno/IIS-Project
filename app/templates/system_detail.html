@@ -57,14 +57,14 @@
 
     <!-- TODO kpi parameter names -->
     <h3 class="mt-4">KPIs</h3>
-    {% for kpi in kpis %}
+    {% for kpi, parameter in kpis %}
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">{{kpi.name}}</h5>
+                <h5 class="card-title">{{kpi.name}} ({{parameter.name}})</h5>
                 <p class="card-text">{{kpi.description}}</p>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">{parameter name} {{kpi.lower_limit}} {unit}</li>
-                    <li class="list-group-item">{parameter name} {{kpi.upper_limit}} {unit}</li>
+                    <li class="list-group-item">from {{kpi.lower_limit}} {{parameter.unit}}</li>
+                    <li class="list-group-item">to {{kpi.upper_limit}} {{parameter.unit}}</li>
                 </ul>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                     <a class="btn btn-danger" href="/systems/{{system.id}}/kpi/{{kpi.id}}/delete/">Delete</a>
