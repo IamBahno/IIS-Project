@@ -373,11 +373,11 @@ def kpi_create(system_id, kpi_id = None):
         return redirect(f'/systems/{system_id}/')
 
     elif kpi_id and not form.is_submitted():
-        form.name.data = kpi.name
-        form.name.description = kpi.description
-        form.name.parameter = kpi.parameter
-        form.name.lower_limit = kpi.lower_limit
-        form.name.upper_limit = kpi.upper_limit
+        form.kpi_name.data = kpi.name
+        form.kpi_description.data = kpi.description
+        form.parameter.data = kpi.parameter_id
+        form.lower_limit.data = kpi.lower_limit
+        form.upper_limit.data = kpi.upper_limit
         title = f"Edit KPI {kpi_id}"
 
     return render_template('kpi_create.html', form=form)
