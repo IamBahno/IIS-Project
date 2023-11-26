@@ -12,8 +12,6 @@ auth = Blueprint('auth', __name__)
 #TODO admin manage Users, (delete, change password ?)
 #TODO create parameter device_type
 #TODO kdyz nejde smazat parameter neco vypsat
-#TODO device_type edit
-#// TODO device detail styles
 #TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
 #TODO udelat edit ke vsemu (edit jmena osoby,kpi hodnoty, jmena device etc.....) bud predelat create page aby meli parameter create/edit 
 #                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
