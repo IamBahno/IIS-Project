@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block content %}
+<form method="POST" class="container-sm" style="max-width:768px" novalidate>
+    {{form.hidden_tag()}}
+    <h2>{{title}}</h2>
+    <div class="form-floating mb-3">
+        {{form.parameter_name(class="form-control" + (" is-invalid" if 'parameter_name' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+        {{form.parameter_name.label}}
+        {% if 'parameter_name' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['parameter_name'][0]}}</div>
+        {% endif %}
+    </div>
+    <div class="form-floating mb-3">
+        {{form.parameter_unit(class="form-control" + (" is-invalid" if 'parameter_unit' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+        {{form.parameter_unit.label}}
+        {% if 'parameter_unit' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['parameter_unit'][0]}}</div>
+        {% endif %}
+    </div>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        {{form.submit(class="btn btn-primary")}}
+    </div>
+</form>
+{% endblock content %}

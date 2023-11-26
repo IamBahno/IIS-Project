@@ -110,3 +110,8 @@ class DeviceEditForm(FlaskForm):
 class DeviceTypeEditForm(FlaskForm):
     device_type_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
     submit = SubmitField("Save")
+
+class ParameterEditForm(FlaskForm):
+    parameter_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
+    parameter_unit = StringField("Unit*", validators = [DataRequired()])
+    submit = SubmitField("Save")

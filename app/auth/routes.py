@@ -4,7 +4,7 @@ from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 from is_safe_url import is_safe_url
-from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm
+from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm,ParameterEditForm
 
 auth = Blueprint('auth', __name__)
 
@@ -399,10 +399,13 @@ def manage_devices_and_parameters():
 @auth.route("/device_types/create",methods=['GET','POST'])
 @login_required
 def create_device_type():
+    title = "Create device type"
+    form = DeviceTypeEditForm()
+
     if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
-    # TODO create
-    return redirect(url_for('auth.manage_devices_and_parameters'))
+    
+    return render_template('devicetype_create.html', form=form, title=title)
 
 @auth.route("/device_types/<int:device_type_id>/delete",methods=['GET','POST'])
 @login_required
@@ -417,10 +420,21 @@ def delete_device_type(device_type_id):
 @auth.route("/parameters/create",methods=['GET','POST'])
 @login_required
 def create_parameter():
+    title = "Create parameter"
+    form = ParameterEditForm()
+
     if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
-    # TODO create
-    return redirect(url_for('auth.manage_devices_and_parameters'))
+    
+    print("neco")
+    if form.validate_on_submit():
+        print("neco")
+        parameter = Parameter(name=form.parameter_name.data,unit=form.parameter_unit.data)
+        db.session.add(parameter)
+        db.session.commit()
+        return redirect(url_for('auth.manage_devices_and_parameters'))
+
+    return render_template('parameter_create.html', form=form, title=title)
 
 @auth.route("/parameters/<int:parameter_id>/delete",methods=['GET','POST'])
 @login_required
