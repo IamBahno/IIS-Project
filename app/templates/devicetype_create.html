@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+<form method="POST" class="container-sm" style="max-width:768px" novalidate>
+    {{form.hidden_tag()}}
+    <h2>{{title}}</h2>
+    <div class="form-floating mb-3">
+        {{form.devicetype_name(class="form-control" + (" is-invalid" if 'devicetype_name' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
+        {{form.devicetype_name.label}}
+        {% if 'devicetype_name' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['devicetype_name'][0]}}</div>
+        {% endif %}
+    </div>
+    <div class="form-floating mb-3">
+        {{form.parameters(class="form-control" + (" is-invalid" if 'parameters' in form.errors else ""), placeholder="",  oninput="reset_validation(this)",
+            style="height: 200px;")}}
+        {{form.parameters.label}}
+        {% if 'parameters' in form.errors %}
+        <div class="invalid-feedback">{{form.errors['parameters'][0]}}</div>
+        {% endif %}
+    </div>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        {{form.submit(class="btn btn-primary")}}
+    </div>
+</form>
+{% endblock content %}

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField, FloatField
+from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField, FloatField, SelectMultipleField
 from wtforms.validators import DataRequired, ValidationError, Optional
 from app.models import User,System
 from app import bcrypt
@@ -108,7 +108,8 @@ class DeviceEditForm(FlaskForm):
     submit = SubmitField("Save")
     
 class DeviceTypeEditForm(FlaskForm):
-    device_type_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
+    devicetype_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
+    parameters = SelectMultipleField("Parameters*", validators=[DataRequired()], coerce=int)
     submit = SubmitField("Save")
 
 class ParameterEditForm(FlaskForm):

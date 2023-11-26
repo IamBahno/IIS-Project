@@ -413,9 +413,21 @@ def manage_devices_and_parameters():
 def create_device_type():
     title = "Create device type"
     form = DeviceTypeEditForm()
+    parameters = Parameter.query.all()
+    choices = [(parameter.id, parameter.name) for parameter in parameters]
+    form.parameters.choices = choices
 
     if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
+
+    if form.validate_on_submit():
+        devicetype = DeviceType(name=form.devicetype_name.data)
+        for param_id in form.parameters.data:
+            parameter = Parameter.query.get_or_404(param_id)
+            devicetype.parameters.append(parameter)
+        db.session.add(devicetype)
+        db.session.commit()
+        return redirect(url_for('auth.manage_devices_and_parameters'))
     
     return render_template('devicetype_create.html', form=form, title=title)
 
@@ -438,9 +450,7 @@ def create_parameter():
     if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
     
-    print("neco")
     if form.validate_on_submit():
-        print("neco")
         parameter = Parameter(name=form.parameter_name.data,unit=form.parameter_unit.data)
         db.session.add(parameter)
         db.session.commit()
