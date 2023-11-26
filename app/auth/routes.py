@@ -243,7 +243,7 @@ def system_detail(system_id):
     #     delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
 
     system=System.query.get_or_404(system_id)
-    if current_user not in system.users and current_user.role != "admin":
+    if system not in current_user.used_systems and current_user.id != system.system_manager and current_user.role != "admin":
         abort(403)
 
     devices = Device.query.filter_by(system=system.id).all()
