@@ -497,6 +497,9 @@ def edit_user(user_id):
         abort(403)
 
     form = UserEditForm()
+    if current_user.role != "admin":
+        del form.role
+
     title = f"Edit user {user_id}"
 
     user = User.query.get_or_404(user_id)
@@ -521,8 +524,6 @@ def edit_user(user_id):
 
         if current_user.role == "admin":
             form.role.data = user.role
-        else:
-            del form.role
         
     return render_template('edit_user.html', form=form, title=title)
 
