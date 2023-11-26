@@ -16,6 +16,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
+    login_manager.refresh_view = 'auth.refresh'
 
     from app.auth.routes import auth
     app.register_blueprint(auth)
