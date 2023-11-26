@@ -48,6 +48,11 @@ class User(db.Model, UserMixin):
     # N:M request system use
     request_system = db.relationship('System',secondary=request_system,backref='users_requesting')
 
+    @classmethod
+    def delete(cls, user_id):
+        user = User.query.filter_by(id=user_id).first()
+        db.session.delete(user)
+        db.session.commit()
 
 class System(db.Model):
     __tablename__ = "system"
