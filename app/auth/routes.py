@@ -7,134 +7,21 @@ from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField, FloatField
 from wtforms.validators import DataRequired, ValidationError, Optional
 from is_safe_url import is_safe_url
-
-def UsernameUnique(form, field):
-    user = User.query.filter_by(username=field.data).first()
-    if user:
-        raise ValidationError("This username is already taken")
-
-def SystemUnique(form, field):
-    system = System.query.filter_by(name=field.data).first()
-    if system:
-        raise ValidationError("A system with this name already exists.")
-
-class RegisterForm(FlaskForm):
-    #todo limit field lengths?
-    username = StringField("Username*", validators=[DataRequired(), UsernameUnique], render_kw={'autofocus': True})
-    first_name = StringField("First name*", validators=[DataRequired()])
-    last_name = StringField("Last name*", validators=[DataRequired()])
-    password = PasswordField("Password*", validators=[DataRequired()])
-    passwordConfirm = PasswordField("Confirm password*", validators=[DataRequired()])
-    submit = SubmitField("Register")
-
-    def validate(self, extra_validators=None):
-        valid = super(RegisterForm, self).validate(extra_validators)
-        if not valid:
-            return False
-
-        if self.password.data == self.passwordConfirm.data:
-            return True
-
-        self.passwordConfirm.errors.append('Passwords do not match.')
-        return False
-
-class KPIEditForm(FlaskForm):
-    kpi_name = StringField("Name*", validators=[DataRequired()], render_kw={'autofocus': True})
-    kpi_description = TextAreaField("Description")
-    parameter = SelectField("Parameter*", validators=[DataRequired()], coerce=int)
-    lower_limit = FloatField("Lower limit", validators=[Optional()])
-    upper_limit = FloatField("Upper limit", validators=[Optional()])
-    submit = SubmitField("Save")
-
-    def validate(self, extra_validators=None):
-        valid = super(KPIEditForm, self).validate(extra_validators)
-        if not valid:
-            return False
-
-        if self.lower_limit.data == None and self.upper_limit.data == None:
-            self.lower_limit.errors.append("At least one limit has to be specified.")
-            self.upper_limit.errors.append("At least one limit has to be specified.")
-            return False
-
-        if self.lower_limit.data != None and self.upper_limit.data != None and self.lower_limit.data > self.upper_limit.data:
-            self.lower_limit.errors.append("The lower limit cannot be higher than the upper limit.")
-            self.upper_limit.errors.append("The upper limit cannot be lower than the lower limit.")
-            return False
-
-        return True
-
-class LoginForm(FlaskForm):
-    #todo limit field lengths?
-    username = StringField("Username*", validators=[DataRequired()], render_kw={'autofocus': True})
-    password = PasswordField("Password*", validators=[DataRequired()])
-    submit = SubmitField("Log in")
-
-    def validate(self, extra_validators=None):
-        valid = super(LoginForm, self).validate(extra_validators)
-        if not valid:
-            return False
-
-        user = User.query.filter_by(username=self.username.data).first()
-
-        if user and bcrypt.check_password_hash(user.hashed_password,self.password.data):
-            return True
-
-        self.password.errors.append('Invalid combination of username and password')
-        return False
-
-class SystemEditForm(FlaskForm):
-    #todo limit field lengths?
-    system_name_edit = HiddenField()
-    system_name = StringField("System name*", validators=[DataRequired()], render_kw={'autofocus': True})
-    system_description = TextAreaField("System description")
-    submit = SubmitField("Save")
-
-    def validate(self, extra_validators=None):
-        valid = super(SystemEditForm, self).validate(extra_validators)
-        if not valid:
-            return False
-
-        #todo check
-        if self.system_name.data != self.system_name_edit.data:
-            try:
-                SystemUnique(self, self.system_name)
-            except ValidationError as e:
-                self.system_name.errors.append(e)
-                return False
-
-        return True
-
-class DeviceEditForm(FlaskForm):
-    device_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
-    device_description = TextAreaField("Description")
-    device_type = SelectField("Type*", validators=[DataRequired()], coerce=int)
-    submit = SubmitField("Save")
-    
-class DeviceTypeEditForm(FlaskForm):
-    device_type_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
-    submit = SubmitField("Save")
+from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm
 
 auth = Blueprint('auth', __name__)
 
+#TODO admin manage Users, (delete, change password ?)
 #TODO create parameter device_type
-#// TODO moznost aby uzivatel systemu prestal uzivat
 #TODO kdyz nejse smazat parameter neco vypsat
 #TODO device_type edit
 #TODO device detail styles
 #TODO device detail form rewrite
 #TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
-#TODO pridat kpi do systemu, vsechny kpi projit, pokud jes aspon jedno "KO" hodit tam ko, nebo tak neco
-#// TODO kpi delete
-#// TODO nekam vypisovat veci jako kpi jmneo popis etc.
-#// TODO u vytvareni kpi, udelat nejak ze musi byt nastavenej aspon jedna limit, kontrolovat ze jedna mensi hodnota je oprvdu mensi, regexi na zadavani cisel
-#// TODO delete device v system deatilu nebo device detailu
-#// TODO oddelat ze v register formulari si vybiras role, (mozna pridelaat ze admin muze davat ostatnim adim role)
 #TODO udelat edit ke vsemu (edit jmena osoby,kpi hodnoty, jmena device etc.....) bud predelat create page aby meli parameter create/edit 
 #                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
 #TODO vypisovat vsude nejakej rozumnej header (treaba kdyz vytvaris device aby byl tam byl vypsanej system nebo tak neco )
 #TODO zajisti koretkni vstupy
-#// TODO zajistit aby pri zadani neplatny hodnoty jako unikatni jmeno atd. nespadl program
-#// TODO oznacit poviny pole, aby program nepadal pri nezadani tech nepoviny atd...
 
 @auth.route("/login/", methods=['GET', 'POST'])
 def login():
@@ -236,7 +123,8 @@ def system_detail(system_id):
     
     kpis = Kpi.query.filter_by(system=system_id).all()
     parameters = Parameter.query.all()
-    parameters_of_kpis = [parameters[kpi.parameter_id - 1] for kpi in kpis]
+    parameters_of_kpis = [Parameter.query.filter_by(id=kpi.id).all() for kpi in kpis]
+
     
         #list of kpis for each parameter
     kpis_of_devices = [[Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters] for parameters in parameters_of_devices]
@@ -348,6 +236,7 @@ def device_delete(system_id, device_id):
 @login_required
 def device_detail(system_id, device_id):
     if "add-value" in request.values:
+        print("aaaaaaaaaaddddddddddd")
         value_value = request.values["value"]
         try:
             value_value = int(value_value)
@@ -358,11 +247,20 @@ def device_detail(system_id, device_id):
         db.session.commit()
     device = Device.query.get_or_404(device_id)
     title = device.name
-    device_type = DeviceType.query.filter_by(id=device.device_type_id).first()
-    #list of parameters
-    parameters = device_type.parameters
-    #list of values
-    values = [Value.query.filter_by(parameter=parameter.id,device=device.id).order_by(Value.timestamp.desc()).first() for parameter in parameters]
+
+    parameters_and_values = (
+        db.session.query(Parameter, Value)
+        .join(DeviceType, Parameter.device_types)
+        .join(Device, DeviceType.devices)
+        .outerjoin(Value, (Value.parameter == Parameter.id) & (Value.device == device_id))
+        .filter(Device.id == device_id)
+        .order_by(Parameter.id, Value.timestamp.desc())
+        .distinct(Parameter.id)
+        .all()
+    )
+    transposed_list = list(zip(*parameters_and_values))
+    parameters, values = transposed_list
+
     #list of kpis for each parameter
     kpis = [Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters]
     #list of kpi states for parameters
