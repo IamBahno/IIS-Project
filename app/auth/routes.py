@@ -4,7 +4,7 @@ from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user, fresh_login_required, confirm_login, login_fresh
 from datetime import datetime
 from is_safe_url import is_safe_url
-from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm,ParameterEditForm
+from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm,ParameterEditForm,UserEditForm,PasswordEdit
 
 auth = Blueprint('auth', __name__)
 
@@ -485,3 +485,39 @@ def delete_user(user_id):
         abort(403)
     User.delete(user_id)
     return redirect(url_for('auth.manage_users'))
+
+@auth.route("/users/<int:user_id>/edit_info/",methods=['GET','POST'])
+@fresh_login_required
+def edit_user(user_id):
+    if current_user.id != user_id and current_user.role != "admin":
+        abort(403)
+
+    form = UserEditForm()
+    title = f"Edit user {user_id}"
+
+    user = User.query.get_or_404(user_id)
+
+    if form.validate_on_submit():
+        user.username = form.username.data
+        user.first_name = form.first_name.data
+        user.last_name = form.last_name.data
+        
+        if current_user.role == "admin":
+            user.role = form.role.data
+
+        db.session.commit()
+
+        return redirect(url_for('auth.home'))
+
+    else:
+        form.username_edit.data = user.username
+        form.username.data = user.username
+        form.first_name.data = user.first_name
+        form.last_name.data = user.last_name
+
+        if current_user.role == "admin":
+            form.role.data = user.role
+        else:
+            del form.role
+        
+    return render_template('edit_user.html', form=form, title=title)
