@@ -157,19 +157,13 @@ def delete_system_request(user_id = None, system_id = None,db = None):
 
 def parameters_of_system(system_id):
     if system_id != None:
-        system = System.query.filter_by(id=system_id).first()
-        devices = system.devices
-        device_types_list = [DeviceType.query.filter_by(id=device.device_type_id).first() for device in devices]
-        device_types_set = set(device_types_list) #throws out duplicates
-        parameters = []
-        for device_type in device_types_set:
-            parameters.extend(device_type.parameters)
-        return set(parameters)
+        parameters=db.session.query(Parameter).join(Device,System.devices).filter(System.id==system_id).join(DeviceType).join(Parameter,DeviceType.parameters).all()
+        return parameters
 
 def system_all_ok(system_id):
-    system = System.query.filter_by(id=system_id).first()
-    devices = Device.query.filter_by(system=system.id).all()
-    device_types = [DeviceType.query.filter_by(id=device.device_type_id).first() for device in devices]
+    device_types_and_devices = db.session.query(DeviceType,Device).join(Device,System.devices).filter(System.id==system_id).join(DeviceType,Device.device_type_id == DeviceType.id).all()
+    transposed_list = list(zip(*device_types_and_devices))
+    device_types, devices = transposed_list
     parameters_of_devices = []
     for device_type in device_types:
         parameters = device_type.parameters
@@ -208,3 +202,18 @@ def get_kpi_states(values,kpis_for_parameters):
                     kpis_states.append("KO")
         kpis_states_for_parameters.append(kpis_states)
     return kpis_states_for_parameters
+
+def get_parameters_and_values(device_id):
+    parameters_and_values = (
+        db.session.query(Parameter, Value)
+        .join(DeviceType, Parameter.device_types)
+        .join(Device, DeviceType.devices)
+        .outerjoin(Value, (Value.parameter == Parameter.id) & (Value.device == device_id))
+        .filter(Device.id == device_id)
+        .order_by(Parameter.id, Value.timestamp.desc())
+        .distinct(Parameter.id)
+        .all()
+        )
+    transposed_list = list(zip(*parameters_and_values))
+    parameters, values = transposed_list
+    return parameters,values

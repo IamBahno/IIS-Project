@@ -61,7 +61,7 @@
 
     <!-- TODO kpi parameter names -->
     <h3 class="mt-4">KPIs</h3>
-    {% for kpi, parameter in kpis %}
+    {% for kpi, parameter in zip(kpis,parameters_of_kpis) %}
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">{{kpi.name}} ({{parameter.name}})</h5>
