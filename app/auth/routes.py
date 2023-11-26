@@ -340,7 +340,6 @@ def system_create(system_id = None):
             system = System(name=form.system_name.data,description=form.system_description.data,system_manager=current_user.id)
             db.session.add(system)
         else:
-            #todo check
             system.name = form.system_name.data
             system.description = form.system_description.data
 
