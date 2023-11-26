@@ -1,7 +1,7 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for, abort
 from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,get_kpis_and_parameters,get_parameters_and_values,get_devices_and_types
 from app import db, bcrypt
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, login_required, current_user, fresh_login_required, confirm_login, login_fresh
 from datetime import datetime
 from is_safe_url import is_safe_url
 from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm
@@ -21,18 +21,30 @@ auth = Blueprint('auth', __name__)
 #TODO zajisti koretkni vstupy
 #TODO session expiration
 
+@auth.route("/refresh/", methods=['GET', 'POST'], endpoint="refresh")
 @auth.route("/login/", methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for(auth.home))
+    if ( 'login' in request.url_rule.rule and current_user.is_authenticated) or ( 'refresh' in request.url_rule.rule and login_fresh()):
+        return redirect(url_for('auth.home'))
+
+    if 'refresh' in request.url_rule.rule and not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
 
     form = LoginForm()
+    if 'refresh' in request.url_rule.rule:
+        form.username.data = current_user.username
+        form.username.flags.readonly = True
 
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        flash('Login successful', 'success')
-        login_user(user)
+        if 'refresh' in request.url_rule.rule:
+            user = current_user
+            confirm_login()
+        else:
+            user = User.query.filter_by(username=form.username.data).first()
+            login_user(user)
+        
         next = request.args.get('next')
+
         if next == "" or next == None or not is_safe_url(next, request.host):
             return redirect(url_for('auth.home'))
 
