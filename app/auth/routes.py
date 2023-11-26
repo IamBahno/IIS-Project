@@ -319,6 +319,21 @@ def system_reject_request(system_id, user_id):
 
     return redirect(url_for('auth.system_detail',system_id=system_id))
 
+@auth.route("/systems/<int:system_id>/requests/<int:user_id>/revoke/", methods=['GET', 'POST'])
+@login_required
+def system_revoke_request(system_id, user_id):
+    system = System.query.get_or_404(system_id)
+    user = User.query.get_or_404(user_id)
+
+    if current_user.id != system.system_manager and current_user.role != "admin" and current_user.id != user_id:
+        abort(403)
+    
+    if user in system.users:
+        user.used_systems.remove(system)
+        db.session.commit()
+
+    return redirect(url_for('auth.system_detail',system_id=system_id))
+
 @auth.route("/systems/<int:system_id>/kpi/<int:kpi_id>/delete/",methods=['GET', 'POST'])
 @login_required
 def kpi_delete(system_id, kpi_id):
