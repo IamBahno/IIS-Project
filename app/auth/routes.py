@@ -103,7 +103,7 @@ def systems():
     return render_template('systems.html',systems=systems, title="Systems")
 
 @auth.route("/systems/<int:system_id>/delete/",methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def system_delete(system_id):
     system = System.query.get_or_404(system_id)
 
@@ -229,7 +229,7 @@ def kpi_delete(system_id, kpi_id):
     return redirect(url_for('auth.system_detail',system_id=system_id))
 
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/delete/",methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def device_delete(system_id, device_id):
     system = System.query.get_or_404(system_id)
 
@@ -420,7 +420,7 @@ def create_device_type():
     return render_template('devicetype_create.html', form=form, title=title)
 
 @auth.route("/device_types/<int:device_type_id>/delete",methods=['GET','POST'])
-@login_required
+@fresh_login_required
 def delete_device_type(device_type_id):
     if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
@@ -449,7 +449,7 @@ def create_parameter():
     return render_template('parameter_create.html', form=form, title=title)
 
 @auth.route("/parameters/<int:parameter_id>/delete",methods=['GET','POST'])
-@login_required
+@fresh_login_required
 def delete_parameter(parameter_id):
     if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
