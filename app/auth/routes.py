@@ -1,5 +1,5 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for, abort
-from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,devicetype_parameter,get_parameters_and_values
+from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,get_kpis_and_parameters,devicetype_parameter,get_parameters_and_values,get_devices_and_types
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
@@ -114,14 +114,7 @@ def system_detail(system_id):
 
     title = system.name
 
-    devices_and_types = (
-        db.session.query(Device,DeviceType)
-        .join(Device, DeviceType.id == Device.device_type_id)
-        .filter_by(system=system_id)
-        .all()
-    )
-    transposed_list = list(zip(*devices_and_types))
-    devices, device_types = transposed_list
+    devices,device_types = get_devices_and_types(system_id)
 
 
     parameters_of_devices,values_of_devices = [],[]
@@ -131,9 +124,7 @@ def system_detail(system_id):
         values_of_devices.append(values)
 
 
-    kpis_and_parameters = db.session.query(Parameter,Kpi).join(Parameter,Kpi.parameter_id == Parameter.id).filter(Kpi.system==system.id).all()
-    transposed_list = list(zip(*kpis_and_parameters))
-    parameters_of_kpis, kpis = transposed_list
+    parameters_of_kpis, kpis = get_kpis_and_parameters(system.id)
 
 
     #list of kpis for each parameter

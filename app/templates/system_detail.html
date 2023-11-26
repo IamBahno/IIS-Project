@@ -25,8 +25,8 @@
     </div>
     {% endif %}
 
-    <!--  TODO parameter values -->
     <!--  TODO request styles -->
+    <!--  TODO nadepsat u device Parametry a KPIs -->
     <h3>Devices:</h3>
     {% for device,parameters,values,kpis_of_parameters,kpis_states_of_parameters in zip(devices,parameters,values,kpis_of_devices,kpis_states_of_devices) %} 
         <div class="card">
@@ -38,7 +38,6 @@
                     <li class="list-group-item">{{parameter.name}}: {{value.value}} {{parameter.unit}}</li>
                     {% endfor %}
                 </ul>
-
                 <ul class="list-group list-group-flush">
                     {% for parameter,value,kpis,kpi_states in zip(parameters,values,kpis_of_parameters,kpis_states_of_parameters) %}
                             {% for kpi,kpi_state in zip(kpis,kpi_states) %}
@@ -59,7 +58,6 @@
         </div>
     {% endfor %}
 
-    <!-- TODO kpi parameter names -->
     <h3 class="mt-4">KPIs</h3>
     {% for kpi, parameter in zip(kpis,parameters_of_kpis) %}
         <div class="card">

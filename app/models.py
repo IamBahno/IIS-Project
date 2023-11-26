@@ -217,3 +217,20 @@ def get_parameters_and_values(device_id):
     transposed_list = list(zip(*parameters_and_values))
     parameters, values = transposed_list
     return parameters,values
+
+def get_devices_and_types(system_id):
+    devices_and_types = (
+        db.session.query(Device,DeviceType)
+        .join(Device, DeviceType.id == Device.device_type_id)
+        .filter_by(system=system_id)
+        .all()
+    )
+    transposed_list = list(zip(*devices_and_types))
+    devices, device_types = transposed_list
+    return devices,device_types
+
+def get_kpis_and_parameters(system_id):
+    kpis_and_parameters = db.session.query(Parameter,Kpi).join(Parameter,Kpi.parameter_id == Parameter.id).filter(Kpi.system==system_id).all()
+    transposed_list = list(zip(*kpis_and_parameters))
+    parameters_of_kpis, kpis = transposed_list
+    return parameters_of_kpis,kpis
