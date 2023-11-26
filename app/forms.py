@@ -122,6 +122,7 @@ class UserEditForm(FlaskForm):
     username = StringField("Username*", validators=[DataRequired()], render_kw={'autofocus': True})
     first_name = StringField("First name*", validators=[DataRequired()])
     last_name = StringField("Last name*", validators=[DataRequired()])
+    role = SelectField("Parameter*", validators=[DataRequired()], choices=[('admin', "Admin"), ('broker', "Broker"), ('user', "User")])
     submit = SubmitField("Save")
 
     def validate(self, extra_validators=None):
