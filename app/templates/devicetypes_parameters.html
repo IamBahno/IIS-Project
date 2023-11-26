@@ -1,39 +1,48 @@
 {% extends "layout.html" %}
 {% block content %}
+
 <div class="container">
-    <h2>{{title}}</h2>
-    <ul class="list-group list-group-flush mt-4">
-        <h3>Device types:</h3>
+    <h1>{{title}}</h1>
+
+    <h3>Device types:</h3>
+    <div class="container mt-4">
         {% for device_type in device_types %}
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
-            <a class="btn btn-secondary" href="/device_types/{{device_type.id}}/edit">Edit device type</a>
-        </div>
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
-            <a class="btn btn-secondary" href="/device_types/{{device_type.id}}/delete">Delete device type</a>
-        </div>
-            <li class="list-group-item"><h3>{{device_type.name}}</h3><br>
-                    {% for parameter in device_type.parameters %}
-                        {{parameter.name}} units: {{parameter.unit}}
-                    {% endfor %}
-            </li>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{device_type.name}}</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for parameter in device_type.parameters %}
+                            <li class="list-group-item">{{parameter.name}} [{{parameter.unit}}]</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a class="btn btn-danger" href="/device_types/{{device_type.id}}/delete">Delete</a>
+                    </div>
+                </div>
+            </div>
         {% endfor %}
-    </ul>
-
-    <ul class="list-group list-group-flush">
-        <h3>Paremeters:</h3>
-        {% for parameter in parameters %}
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
-            <a class="btn btn-secondary" href="/parameters/{{parameter.id}}/edit">Delete device type</a>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+            <a class="btn btn-secondary" href="/device_types/create">Create device</a>
         </div>
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
-            <a class="btn btn-secondary" href="/parameters/{{parameter.id}}/delete">Delete parameter</a>
-        </div>
-
-            <li class="list-group-item">
-                {{parameter.name}} units: {{parameter.unit}} <br>
+    </div>
+    
+    <h3>Parameters:</h3>
+    <div class="container mt-4">
+        <ul class="list-group">
+            {% for parameter in parameters %}
+            <li class="list-group-item d-grid gap-2 d-md-flex justify-content-md-end" style="min-height:60px">
+                <div class="col text-md-start text-center" style="margin-top:auto;margin-bottom:auto">
+                    {{parameter.name}} [{{parameter.unit}}]
+                </div>
+                <div class="col d-grid gap-2 d-md-flex justify-content-md-end" style="height:min-content;margin-top:auto;margin-bottom:auto">
+                    <a class="btn btn-danger" href="/parameters/{{parameter.id}}/delete">Delete</a>
+                </div>
             </li>
-        {% endfor %}
+            {% endfor %}
+        </ul>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+            <a class="btn btn-secondary" href="/parameters/create">Create parameter</a>
+        </div>
+    </div>
 
-    </ul>
-</div>
 {% endblock %}

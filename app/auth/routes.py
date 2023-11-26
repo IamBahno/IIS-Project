@@ -395,28 +395,13 @@ def manage_devices_and_parameters():
     parameters = Parameter.query.all()
     return render_template('devicetypes_parameters.html', device_types=device_types,parameters = parameters, title=title)
 
-@auth.route("/device_types/<int:device_type_id>/edit",methods=['GET','POST'])
+@auth.route("/device_types/create",methods=['GET','POST'])
 @login_required
-def edit_device_type(device_type_id):
+def create_device_type():
     if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
-    form = DeviceTypeEditForm()
-    if form.validate_on_submit(form):
-        device_type = DeviceType.query.filter_by(id=device_type_id).first()
-        device_type.name = form.device_type_name.data
-        db.session.commit()
-        #TODO fix
-        title = f"Edit device {device_type_id}"
-    else:
-        pass
-    return "<p>aaaaaaaaaa</p>"
-
-@auth.route("/parameters/<int:parameter_id>/edit",methods=['GET','POST'])
-@login_required
-def parameter_edit(parameter_id):
-    if not current_user.is_authenticated or current_user.role != "admin":
-        abort(403)
-    return redirect('/devices_&_parameters/')
+    # TODO create
+    return redirect(url_for('auth.manage_devices_and_parameters'))
 
 @auth.route("/device_types/<int:device_type_id>/delete",methods=['GET','POST'])
 @login_required
@@ -426,7 +411,15 @@ def delete_device_type(device_type_id):
     device_type = DeviceType.query.get_or_404(device_type_id)
     db.session.delete(device_type)
     db.session.commit()
-    return render_template("devicetypes_parameters.html")
+    return redirect(url_for('auth.manage_devices_and_parameters'))
+
+@auth.route("/parameters/create",methods=['GET','POST'])
+@login_required
+def create_parameter():
+    if not current_user.is_authenticated or current_user.role != "admin":
+        abort(403)
+    # TODO create
+    return redirect(url_for('auth.manage_devices_and_parameters'))
 
 @auth.route("/parameters/<int:parameter_id>/delete",methods=['GET','POST'])
 @login_required
@@ -438,4 +431,4 @@ def delete_parameter(parameter_id):
         return redirect(url_for("auth.manage_devices_and_parameters"),code=307)
     db.session.delete(parameter)
     db.session.commit()
-    return redirect('/devices_&_parameters/')
+    return redirect(url_for('auth.manage_devices_and_parameters'))
