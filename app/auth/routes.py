@@ -118,13 +118,12 @@ def system_delete(system_id):
 @login_required
 def system_detail(system_id):
     system=System.query.get_or_404(system_id)
-    if system not in current_user.used_systems and current_user.id != system.system_manager and current_user.role != "admin":
+    if system not in current_user.used_systems and current_user.id != system.system_manager and current_user.role != "admin" and current_user.role != "broker":
         abort(403)
 
     title = system.name
 
     devices,device_types = get_devices_and_types(system_id)
-
 
     parameters_of_devices,values_of_devices = [],[]
     for device in devices:
@@ -147,7 +146,10 @@ def system_detail(system_id):
 @login_required
 def system_request_access(system_id):
     system = System.query.get_or_404(system_id)
-    
+
+    if current_user.role == "broker":
+        abort(403)
+
     if current_user in system.users or current_user.role == "admin":
         return redirect(url_for('auth.system_detail',system_id=system_id))
 
@@ -168,7 +170,7 @@ def system_accept_request(system_id, user_id):
 
     if current_user.id != system.system_manager and current_user.role != "admin":
         abort(403)
-    
+
     if user in system.users or user not in system.users_requesting:
         return redirect(url_for('auth.system_detail',system_id=system_id))
 
@@ -187,7 +189,7 @@ def system_reject_request(system_id, user_id):
 
     if current_user.id != system.system_manager and current_user.role != "admin":
         abort(403)
-    
+
     if user in system.users or user not in system.users_requesting:
         return redirect(url_for('auth.system_detail',system_id=system_id))
 
@@ -205,7 +207,7 @@ def system_revoke_request(system_id, user_id):
 
     if current_user.id != system.system_manager and current_user.role != "admin" and current_user.id != user_id:
         abort(403)
-    
+
     if user in system.users:
         user.used_systems.remove(system)
         db.session.commit()
@@ -298,7 +300,7 @@ def device_create(system_id, device_id = None):
         device = Device.query.get_or_404(device_id)
         form.device_type.validate_choice = False
         form.device_type.validators = []
-        form.device_type.flags.disabled = True  
+        form.device_type.flags.disabled = True
 
     if form.validate_on_submit():
         if not device_id:
@@ -333,6 +335,9 @@ def system_create(system_id = None):
 
         if current_user.role != "admin" and current_user.id != system.system_manager:
             abort(403)
+    
+    if current_user.role == "broker":
+        abort(403)
 
     if form.validate_on_submit():
         #add system button
@@ -401,8 +406,10 @@ def kpi_create(system_id, kpi_id = None):
 @auth.route("/devices_&_parameters/",methods=['GET','POST'])
 @login_required
 def manage_devices_and_parameters():
-    if not current_user.is_authenticated or current_user.role != "admin":
+
+    if current_user.role != "admin":
         abort(403)
+
     title = "Device and parameter manager"
     device_types = DeviceType.query.all()
     parameters = Parameter.query.all()
@@ -418,7 +425,7 @@ def create_device_type():
     choices = [(parameter.id, parameter.name) for parameter in parameters]
     form.parameters.choices = choices
 
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if current_user.role != "admin":
         abort(403)
 
     if form.validate_on_submit():
@@ -435,8 +442,10 @@ def create_device_type():
 @auth.route("/device_types/<int:device_type_id>/delete",methods=['GET','POST'])
 @fresh_login_required
 def delete_device_type(device_type_id):
-    if not current_user.is_authenticated or current_user.role != "admin":
+
+    if current_user.role != "admin":
         abort(403)
+
     device_type = DeviceType.query.get_or_404(device_type_id)
     if (device_type.devices != []):
         return redirect(url_for("auth.manage_devices_and_parameters", error="device in use"))
@@ -450,7 +459,7 @@ def create_parameter():
     title = "Create parameter"
     form = ParameterEditForm()
 
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if current_user.role != "admin":
         abort(403)
     
     if form.validate_on_submit():
@@ -464,7 +473,7 @@ def create_parameter():
 @auth.route("/parameters/<int:parameter_id>/delete",methods=['GET','POST'])
 @fresh_login_required
 def delete_parameter(parameter_id):
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if current_user.role != "admin":
         abort(403)
     parameter = Parameter.query.get_or_404(parameter_id)
     if (parameter.device_types != []):
@@ -476,7 +485,7 @@ def delete_parameter(parameter_id):
 @auth.route("/users/",methods=['GET','POST'])
 @login_required
 def manage_users():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if current_user.role != "admin":
         abort(403)
     title = "Users"
     users = User.query.all()
@@ -485,7 +494,7 @@ def manage_users():
 @auth.route("/users/<int:user_id>/delete/",methods=['GET','POST'])
 @login_required
 def delete_user(user_id):
-    if not current_user.is_authenticated or (current_user.role != "admin" and current_user.id != user_id):
+    if current_user.role != "admin" and current_user.id != user_id:
         abort(403)
     User.delete(user_id)
     return redirect(url_for('auth.manage_users'))
