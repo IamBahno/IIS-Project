@@ -10,13 +10,14 @@
         <div class="invalid-feedback">{{form.errors['parameter_name'][0]}}</div>
         {% endif %}
     </div>
-    <div class="form-floating mb-3">
+    <div class="form-floating mb-1">
         {{form.parameter_unit(class="form-control" + (" is-invalid" if 'parameter_unit' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
         {{form.parameter_unit.label}}
         {% if 'parameter_unit' in form.errors %}
         <div class="invalid-feedback">{{form.errors['parameter_unit'][0]}}</div>
         {% endif %}
     </div>
+    <small class="text-muted">Fields marked with '*' are mandatory.</small>
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
         {{form.submit(class="btn btn-primary")}}
     </div>
