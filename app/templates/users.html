@@ -11,8 +11,8 @@
             <p class="card-text">Last name: {{user.last_name}}</p>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <a class="btn btn-primary" href="/users/{{user.id}}/delete/">Delete</a>
-                <a class="btn btn-primary" href="/systems/">Edit</a>
-                <a class="btn btn-primary" href="/systems/">Change password</a>
+                <a class="btn btn-primary" href="/users/{{user.id}}/edit_info">Edit</a>
+                <a class="btn btn-primary" href="/users/{{user.id}}/edit_password">Change password</a>
             </div>
         </div>
     </div>
