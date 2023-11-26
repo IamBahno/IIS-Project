@@ -17,8 +17,8 @@ def SystemUnique(form, field):
 
 class RegisterForm(FlaskForm):
     username = StringField("Username*", validators=[DataRequired(), UsernameUnique, Length(max=20)], render_kw={'autofocus': True})
-    first_name = StringField("First name*", validators=[DataRequired(), Length(max=30)])
-    last_name = StringField("Last name*", validators=[DataRequired(), Length(max=30)])
+    first_name = StringField("First name", validators=[Length(max=30)])
+    last_name = StringField("Last name", validators=[Length(max=30)])
     password = PasswordField("Password*", validators=[DataRequired()])
     passwordConfirm = PasswordField("Confirm password*", validators=[DataRequired()])
     submit = SubmitField("Register")
@@ -116,8 +116,8 @@ class ParameterEditForm(FlaskForm):
 class UserEditForm(FlaskForm):
     username_edit = HiddenField()
     username = StringField("Username*", validators=[DataRequired(), Length(max=20)], render_kw={'autofocus': True})
-    first_name = StringField("First name*", validators=[DataRequired(), Length(max=30)])
-    last_name = StringField("Last name*", validators=[DataRequired(), Length(max=30)])
+    first_name = StringField("First name", validators=[Length(max=30)])
+    last_name = StringField("Last name", validators=[Length(max=30)])
     role = SelectField("Parameter*", validators=[DataRequired()], choices=[('admin', "Admin"), ('broker', "Broker"), ('user', "User")])
     submit = SubmitField("Save")
 
