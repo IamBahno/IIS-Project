@@ -27,7 +27,11 @@
     <br>
     {% endfor %}
     {% if img!=None %}
-    <img src="data:image/png;base64,{{ img }}" alt="Value Changes Plot">
+    <div class="row">
+        <div class="col">
+            <img class="img-fluid mx-auto d-block" src="data:image/png;base64,{{ img }}" alt="Value Changes Plot">
+        </div>
+    </div>
     {% endif %}
 </div>
 {% endblock content %}
