@@ -5,7 +5,10 @@ from flask_login import login_user, logout_user, login_required, current_user, f
 from datetime import datetime
 from is_safe_url import is_safe_url
 from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm,ParameterEditForm,UserEditForm,PasswordEdit
-
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from io import BytesIO
+import base64
 auth = Blueprint('auth', __name__)
 
 
@@ -261,15 +264,19 @@ def set_param_data(system_id, device_id, param_id):
 def device_detail(system_id, device_id):
     device = Device.query.get_or_404(device_id)
     title = device.name
+    
+    img = get_graph(device)
+    
 
+    #img end
     parameters,values = get_parameters_and_values(device.id)
-
     #list of kpis for each parameter
     kpis = [Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters]
     #list of kpi states for parameters
     kpi_states = get_kpi_states(values,kpis)
     return render_template('device_detail.html', device_id=int(device_id), system_id=system_id,user=current_user,values=values,
-                           parameters=parameters,kpis=kpis,kpi_parameters_states=kpi_states,default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip, title=title)
+                           parameters=parameters,kpis=kpis,img=img,kpi_parameters_states=kpi_states,
+                           default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip, title=title)
     
 @auth.route("/systems/<int:system_id>/devices/create/",methods=['GET', 'POST'])
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/edit/",methods=['GET', 'POST'])
@@ -543,3 +550,61 @@ def edit_password(user_id):
         
     return render_template('edit_password.html', form=form, title=title)
 
+def get_graph(device):
+    #img
+    datas = []
+    pars = DeviceType.query.filter_by(id=device.device_type_id).first().parameters
+    for par in pars:
+        # lol = db.session.query(Value).join(Parameter,DeviceType.parameters).filter(Parameter.id == par.id).join(Device,DeviceType.devices).filter(Device.id==device_id).join(Value,Device.values).all()
+        lol = (db.session.query(Value).join(DeviceType, Parameter.device_types)
+               .filter(Parameter.id==par.id)
+               .join(Device, DeviceType.devices)
+                .outerjoin(Value, (Value.parameter == Parameter.id) & (Value.device == device.id))
+                .filter(Device.id == device.id)
+                .order_by(Parameter.id, Value.timestamp.asc())
+                .all()
+                )
+        chi = []
+        for l in lol:
+            if l == None:
+                return None
+            chi.append((l.timestamp,l.value))
+        datas.append(chi)
+    # print(datas)
+    # data = datas[0]
+    # data = [(1, 10), (2, 15), (3, 8), (4, 20)]
+
+    # Create a simple plot with transparent background and custom styling
+    # fig, ax = plt.subplots()
+    fig, ax = plt.subplots(len(datas), 1, figsize=(8, 6))
+    for i,(data,par) in enumerate(zip(datas,pars)):
+        ax[i].plot([entry[0] for entry in data], [entry[1] for entry in data], color='orange', marker='o', linestyle='-', linewidth=2)
+        ax[i].set_title(par.name)
+        # Customize axis colors
+        ax[i].spines['bottom'].set_color('gray')
+        ax[i].spines['top'].set_color('gray')
+        ax[i].spines['right'].set_color('gray')
+        ax[i].spines['left'].set_color('gray')
+        
+        ax[i].xaxis.label.set_color('gray')
+        ax[i].yaxis.label.set_color('gray')
+        
+        ax[i].tick_params(axis='x', colors='gray')
+        ax[i].tick_params(axis='y', colors='gray')
+        
+        ax[i].grid(color='lightgray', linestyle='--', linewidth=0.5)
+        
+        ax[i].set_xlabel('Timestamp')
+        ax[i].set_ylabel('Value')
+        ax[i].set_facecolor((0, 0, 0, 0))  # Transparent background
+    
+    # plt.title('Value Changes Over Time')
+    fig.tight_layout()
+    # Save the plot to a BytesIO object
+    img_data = BytesIO()
+    plt.savefig(img_data, format='png', transparent=True)
+    img_data.seek(0)
+
+    # Encode the image data to base64 for HTML embedding
+    img_base64 = base64.b64encode(img_data.read()).decode('utf-8')
+    return img_base64
