@@ -162,6 +162,8 @@ def parameters_of_system(system_id):
 
 def system_all_ok(system_id):
     device_types_and_devices = db.session.query(DeviceType,Device).join(Device,System.devices).filter(System.id==system_id).join(DeviceType,Device.device_type_id == DeviceType.id).all()
+    if device_types_and_devices == []:
+        return "OK"
     transposed_list = list(zip(*device_types_and_devices))
     device_types, devices = transposed_list
     parameters_of_devices = []
@@ -214,6 +216,8 @@ def get_parameters_and_values(device_id):
         .distinct(Parameter.id)
         .all()
         )
+    if parameters_and_values == []:
+        return [],[]
     transposed_list = list(zip(*parameters_and_values))
     parameters, values = transposed_list
     return parameters,values
@@ -225,12 +229,16 @@ def get_devices_and_types(system_id):
         .filter_by(system=system_id)
         .all()
     )
+    if(devices_and_types == []):
+        return [],[]
     transposed_list = list(zip(*devices_and_types))
     devices, device_types = transposed_list
     return devices,device_types
 
 def get_kpis_and_parameters(system_id):
     kpis_and_parameters = db.session.query(Parameter,Kpi).join(Parameter,Kpi.parameter_id == Parameter.id).filter(Kpi.system==system_id).all()
+    if(kpis_and_parameters == []):
+        return [],[]
     transposed_list = list(zip(*kpis_and_parameters))
     parameters_of_kpis, kpis = transposed_list
     return parameters_of_kpis,kpis
