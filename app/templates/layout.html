@@ -44,6 +44,9 @@
                     </li>
                     {% else %}
                     <li class="nav-item">
+                        <a href="/users/{{current_user.id}}/edit_info/" class="nav-link {% if request.path == "/users/{{current_user.id}}/edit_info/" %}active{% endif %}">Edit user info</a>
+                    </li>
+                    <li class="nav-item">
                         <a href="/logout/" class="nav-link">Logout ({{ current_user.username }})</a>
                     </li>
                     {% endif %}
