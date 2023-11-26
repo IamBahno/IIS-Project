@@ -17,13 +17,14 @@
         <div class="invalid-feedback">{{form.errors['device_description'][0]}}</div>
         {% endif %}
     </div>
-    <div class="form-floating mb-3">
+    <div class="form-floating mb-1">
         {{form.device_type(class="form-control" + (" is-invalid" if 'device_type' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
         {{form.device_type.label}}
         {% if 'device_type' in form.errors %}
         <div class="invalid-feedback">{{form.errors['device_type'][0]}}</div>
         {% endif %}
     </div>
+    <small class="text-muted">Fields marked with '*' are mandatory.</small>
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
         {{form.submit(class="btn btn-primary")}}
     </div>

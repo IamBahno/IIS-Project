@@ -47,7 +47,7 @@
     </div>
     <div class="row">
         <div class="col">
-            <div class="form-floating mb-3">
+            <div class="form-floating mb-1">
                 {{form.passwordConfirm(class="form-control" + (" is-invalid" if 'passwordConfirm' in form.errors else ""), placeholder="",  oninput="reset_validation(this)")}}
                 {{form.passwordConfirm.label}}
                 {% if 'passwordConfirm' in form.errors %}
@@ -56,6 +56,7 @@
             </div>
         </div>
     </div>
+    <small class="text-muted">Fields marked with '*' are mandatory.</small>
     <div class="row">
         <div class="col">
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
