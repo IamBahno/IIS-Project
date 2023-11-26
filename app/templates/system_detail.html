@@ -4,9 +4,11 @@
 
     <h1>{{title}}</h1>
     <p>{{ system.description }}</p>
+    {% if system.system_manager == user.id or user.role == "admin" %}
     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
         <a class="btn btn-secondary" href="/systems/{{system.id}}/edit">Edit system</a>
     </div>
+    {% endif %}
     <!-- TODO: zadosti o system -->
     {% if (system.system_manager == user.id or user.role == "admin") and system.users_requesting |length != 0 %}
     <div class="mb-4">
@@ -51,8 +53,10 @@
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                     <a class="btn btn-primary" href="/systems/{{system.id}}/devices/{{device.id}}">Detail</a>
+                    {% if system.system_manager == user.id or user.role == "admin" %}
                     <a class="btn btn-primary" href="/systems/{{system.id}}/devices/{{device.id}}/edit/">Edit</a>
                     <a class="btn btn-danger" href="/systems/{{system.id}}/devices/{{device.id}}/delete/">Delete</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -68,10 +72,12 @@
                     <li class="list-group-item">from {{kpi.lower_limit}} {{parameter.unit}}</li>
                     <li class="list-group-item">to {{kpi.upper_limit}} {{parameter.unit}}</li>
                 </ul>
+                {% if system.system_manager == user.id or user.role == "admin" %}
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                     <a class="btn btn-primary" href="/systems/{{system.id}}/kpi/{{kpi.id}}/edit/">Edit</a>
                     <a class="btn btn-danger" href="/systems/{{system.id}}/kpi/{{kpi.id}}/delete/">Delete</a>
                 </div>
+                {% endif %}
             </div>
         </div>
     {% endfor %}
@@ -82,7 +88,7 @@
         <a class="btn btn-secondary" href="/systems/{{system.id}}/devices/create">Add device</a>
         <a class="btn btn-secondary" href="/systems/{{system.id}}/kpi/create">Define kpi</a>
         {% endif %}
-        {% if user.role != "admin" and user.id != system.system_manager %}
+        {% if user.role == "user" and user.id != system.system_manager %}
         <a class="btn btn-warning" href="/systems/{{system.id}}/requests/{{user.id}}/revoke/">Leave system</a>
         {% endif %}
     </div>
