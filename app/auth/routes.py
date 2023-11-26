@@ -12,11 +12,9 @@ auth = Blueprint('auth', __name__)
 #TODO admin manage Users, (delete, change password ?)
 #TODO create parameter device_type
 #TODO kdyz nejde smazat parameter neco vypsat
-#TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
 #TODO udelat edit ke vsemu (edit jmena osoby,kpi hodnoty, jmena device etc.....) bud predelat create page aby meli parameter create/edit 
 #                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
 #TODO vypisovat vsude nejakej rozumnej header (treaba kdyz vytvaris device aby byl tam byl vypsanej system nebo tak neco )
-#TODO zajisti koretkni vstupy
 
 @auth.route("/refresh/", methods=['GET', 'POST'], endpoint="refresh")
 @auth.route("/login/", methods=['GET', 'POST'])
@@ -502,7 +500,6 @@ def edit_user(user_id):
         
         if current_user.role == "admin":
             user.role = form.role.data
-
         db.session.commit()
 
         return redirect(url_for('auth.home'))
