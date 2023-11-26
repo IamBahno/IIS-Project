@@ -265,7 +265,7 @@ def device_detail(system_id, device_id):
     device = Device.query.get_or_404(device_id)
     title = device.name
     
-    img = get_graph(device)
+    images = get_graph(device)
     
 
     #img end
@@ -275,7 +275,7 @@ def device_detail(system_id, device_id):
     #list of kpi states for parameters
     kpi_states = get_kpi_states(values,kpis)
     return render_template('device_detail.html', device_id=int(device_id), system_id=system_id,user=current_user,values=values,
-                           parameters=parameters,kpis=kpis,img=img,kpi_parameters_states=kpi_states,
+                           parameters=parameters,kpis=kpis,img=images,kpi_parameters_states=kpi_states,images=images,
                            default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip, title=title)
     
 @auth.route("/systems/<int:system_id>/devices/create/",methods=['GET', 'POST'])
@@ -571,24 +571,15 @@ def get_graph(device):
             chi.append((l.timestamp,l.value))
         datas.append(chi)
     
-    some_data_found = False
-    for dat in datas:
-        if dat != []:
-            some_data_found=True
-    if some_data_found == False:
-        return None
+    images = []
 
-    # print(datas)
-    # data = datas[0]
-    # data = [(1, 10), (2, 15), (3, 8), (4, 20)]
 
-    # Create a simple plot with transparent background and custom styling
-    # fig, ax = plt.subplots()
-    if (len(datas) == 1):
-        fig, ax = plt.subplots(len(datas), 1, figsize=(8, 6))
-        data=datas[0]
+    for data,par in zip(datas,pars):
+        if data == []:
+            images.append(None)
+        fig, ax = plt.subplots(1, 1, figsize=(8, 6))
         ax.plot([entry[0] for entry in data], [entry[1] for entry in data], color='orange', marker='o', linestyle='-', linewidth=2)
-        ax.set_title(par.name)
+        ax.set_title(par.name,color='white')
         # Customize axis colors
         ax.spines['bottom'].set_color('gray')
         ax.spines['top'].set_color('gray')
@@ -606,36 +597,15 @@ def get_graph(device):
         ax.set_xlabel('Timestamp')
         ax.set_ylabel('Value')
         ax.set_facecolor((0, 0, 0, 0))  # Transparent background
-    else:
-        fig, ax = plt.subplots(len(datas), 1, figsize=(8, 6))
-        for i,(data,par) in enumerate(zip(datas,pars)):
-            ax[i].plot([entry[0] for entry in data], [entry[1] for entry in data], color='orange', marker='o', linestyle='-', linewidth=2)
-            ax[i].set_title(par.name)
-            # Customize axis colors
-            ax[i].spines['bottom'].set_color('gray')
-            ax[i].spines['top'].set_color('gray')
-            ax[i].spines['right'].set_color('gray')
-            ax[i].spines['left'].set_color('gray')
-            
-            ax[i].xaxis.label.set_color('gray')
-            ax[i].yaxis.label.set_color('gray')
-            
-            ax[i].tick_params(axis='x', colors='gray')
-            ax[i].tick_params(axis='y', colors='gray')
-            
-            ax[i].grid(color='lightgray', linestyle='--', linewidth=0.5)
-            
-            ax[i].set_xlabel('Timestamp')
-            ax[i].set_ylabel('Value')
-            ax[i].set_facecolor((0, 0, 0, 0))  # Transparent background
     
-    # plt.title('Value Changes Over Time')
-    fig.tight_layout()
-    # Save the plot to a BytesIO object
-    img_data = BytesIO()
-    plt.savefig(img_data, format='png', transparent=True)
-    img_data.seek(0)
+        # plt.title('Value Changes Over Time')
+        fig.tight_layout()
+        # Save the plot to a BytesIO object
+        img_data = BytesIO()
+        plt.savefig(img_data, format='png', transparent=True)
+        img_data.seek(0)
 
-    # Encode the image data to base64 for HTML embedding
-    img_base64 = base64.b64encode(img_data.read()).decode('utf-8')
-    return img_base64
+        # Encode the image data to base64 for HTML embedding
+        img_base64 = base64.b64encode(img_data.read()).decode('utf-8')
+        images.append(img_base64)
+    return images

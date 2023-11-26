@@ -1,9 +1,16 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="container">
-    {%  for value,parameter,kpis_for_parameter,kpi_states in zip(values,parameters,kpis,kpi_parameters_states) %}
+    {%  for value,parameter,kpis_for_parameter,kpi_states,img in zip(values,parameters,kpis,kpi_parameters_states,images) %}
     <h3 class="row mb-4 ms-1">
         {{parameter.name}}{% if value.value %}: {{value.value}} {{parameter.unit}}{% endif %}
+        {% if img!=None %}
+        <div class="row">
+            <div class="col">
+                <img class="img-fluid mx-auto d-block" src="data:image/png;base64,{{ img }}" alt="Value Changes Plot">
+            </div>
+        </div>
+        {% endif %}
     </h3>
     {% if user.role == "broker" or user.role == "admin" %}
     <form class="row justify-content-md-center" method="POST" action="/systems/{{system_id}}/devices/{{device_id}}/parameters/{{parameter.id}}/add/">
@@ -26,12 +33,5 @@
     {% endif %}
     <br>
     {% endfor %}
-    {% if img!=None %}
-    <div class="row">
-        <div class="col">
-            <img class="img-fluid mx-auto d-block" src="data:image/png;base64,{{ img }}" alt="Value Changes Plot">
-        </div>
-    </div>
-    {% endif %}
 </div>
 {% endblock content %}
