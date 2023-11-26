@@ -23,26 +23,25 @@
             <div class="collapse navbar-collapse" id="navbarToggler">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == "/systems" %}active{% endif %}" href="/systems">Systems</a>
+                        <a class="nav-link {% if request.path == "/systems/" %}active{% endif %}" href="/systems/">Systems</a>
                     </li>
-                </ul>
-                <ul class="navbar-nav">
                     {% if current_user.role == "admin" %}
                         <li class="nav-item">
-                            <a href="/devices_&_parameters" class="nav-link">Manage devices</a>
+                            <a href="/devices_&_parameters/" class="nav-link {% if request.path == "/devices_&_parameters/" %}active{% endif %}">Manage devices</a>
                         </li>
                     {% endif %}
-
+                </ul>
+                <ul class="navbar-nav">
                     {% if not current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a href="/login" class="nav-link {% if request.path == "/login" %}active{% endif %}">Login</a>
+                        <a href="/login/" class="nav-link {% if request.path == "/login/" %}active{% endif %}">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a href="/register" class="nav-link {% if request.path == "/register" %}active{% endif %}">Register</a>
+                        <a href="/register/" class="nav-link {% if request.path == "/register/" %}active{% endif %}">Register</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a href="/logout" class="nav-link">Logout ({{ current_user.username }})</a>
+                        <a href="/logout/" class="nav-link">Logout ({{ current_user.username }})</a>
                     </li>
                     {% endif %}
                 </ul>

@@ -117,22 +117,24 @@ class DeviceTypeEditForm(FlaskForm):
 auth = Blueprint('auth', __name__)
 
 #TODO create parameter device_type
-#TODO moznost aby uzivatel systemu prestal uzivat
+#// TODO moznost aby uzivatel systemu prestal uzivat
 #TODO kdyz nejse smazat parameter neco vypsat
 #TODO device_type edit
+#TODO device detail styles
+#TODO device detail form rewrite
 #TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
 #TODO pridat kpi do systemu, vsechny kpi projit, pokud jes aspon jedno "KO" hodit tam ko, nebo tak neco
-#TODO kpi delete
-#TODO nekam vypisovat veci jako kpi jmneo popis etc.
-#TODO u vytvareni kpi, udelat nejak ze musi byt nastavenej aspon jedna limit, kontrolovat ze jedna mensi hodnota je oprvdu mensi, regexi na zadavani cisel
-#TODO delete device v system deatilu nebo device detailu
+#// TODO kpi delete
+#// TODO nekam vypisovat veci jako kpi jmneo popis etc.
+#// TODO u vytvareni kpi, udelat nejak ze musi byt nastavenej aspon jedna limit, kontrolovat ze jedna mensi hodnota je oprvdu mensi, regexi na zadavani cisel
+#// TODO delete device v system deatilu nebo device detailu
 #// TODO oddelat ze v register formulari si vybiras role, (mozna pridelaat ze admin muze davat ostatnim adim role)
 #TODO udelat edit ke vsemu (edit jmena osoby,kpi hodnoty, jmena device etc.....) bud predelat create page aby meli parameter create/edit 
 #                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
 #TODO vypisovat vsude nejakej rozumnej header (treaba kdyz vytvaris device aby byl tam byl vypsanej system nebo tak neco )
 #TODO zajisti koretkni vstupy
-#TODO zajistit aby pri zadani neplatny hodnoty jako unikatni jmeno atd. nespadl program
-#TODO oznacit poviny pole, aby program nepadal pri nezadani tech nepoviny atd...
+#// TODO zajistit aby pri zadani neplatny hodnoty jako unikatni jmeno atd. nespadl program
+#// TODO oznacit poviny pole, aby program nepadal pri nezadani tech nepoviny atd...
 
 @auth.route("/login/", methods=['GET', 'POST'])
 def login():
@@ -185,12 +187,6 @@ def home():
 
 @auth.route("/systems/",methods=['GET', 'POST'])
 def systems():
-    if request.method == 'POST' and "system-button-request" in request.values:
-        # system = System.query.filter_by(id=request.values["system_id"])
-        current_user.request_system.append(System.query.filter_by(id=request.values["system_id"]).first())
-        db.session.add(current_user)
-        db.session.commit()
-
     systems = []
     systems_in_db =  System.query.all()
     for i in systems_in_db:
@@ -224,27 +220,11 @@ def system_delete(system_id):
 @auth.route("/systems/<int:system_id>/",methods=['GET', 'POST'])
 @login_required
 def system_detail(system_id):
-    # if request.method == "GET" and "device-detail" in request.values:
-    #     return redirect(url_for('auth.device_detail',user=request.values["user_id"],device=request.values["device_id"]))
-    
-    # if "add-device" in request.values:
-    #     return redirect(url_for('auth.device_create',system_id=system_id),code=307)
-    # elif "request-accept" in request.values:
-    #     delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
-
-    #     user = User.query.filter_by(id=request.values["request_user_id"]).first()
-    #     system=System.query.filter_by(id=system_id).first()
-    #     system.users.append(user)
-    #     db.session.add(system)
-    #     db.session.add(user)
-    #     db.session.commit()
-
-    # elif "request-decline" in request.values:
-    #     delete_system_request(user_id = int(request.values["request_user_id"]), system_id = system_id,db = db)
-
     system=System.query.get_or_404(system_id)
     if system not in current_user.used_systems and current_user.id != system.system_manager and current_user.role != "admin":
         abort(403)
+
+    title = system.name
 
     devices = Device.query.filter_by(system=system.id).all()
     device_types = [DeviceType.query.filter_by(id=device.device_type_id).first()  for device in devices]
@@ -262,7 +242,7 @@ def system_detail(system_id):
     kpis_of_devices = [[Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters] for parameters in parameters_of_devices]
     kpis_states = [get_kpi_states(values,kpis) for values,kpis in zip(values_of_devices,kpis_of_devices)]
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
-                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=zip(kpis, parameters_of_kpis))
+                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=zip(kpis, parameters_of_kpis), title=title)
 
 
 @auth.route("/systems/<int:system_id>/request/", methods=['GET', 'POST'])
@@ -332,6 +312,9 @@ def system_revoke_request(system_id, user_id):
         user.used_systems.remove(system)
         db.session.commit()
 
+    if current_user.id == user_id:
+        return redirect(url_for('auth.home'))
+
     return redirect(url_for('auth.system_detail',system_id=system_id))
 
 @auth.route("/systems/<int:system_id>/kpi/<int:kpi_id>/delete/",methods=['GET', 'POST'])
@@ -373,7 +356,8 @@ def device_detail(system_id, device_id):
         value = Value(value=value_value,timestamp=request.values["time"],setter=current_user.id,device=device_id,parameter=request.values["parameter_id"])
         db.session.add(value)
         db.session.commit()
-    device = Device.query.filter_by(id=device_id).first()
+    device = Device.query.get_or_404(device_id)
+    title = device.name
     device_type = DeviceType.query.filter_by(id=device.device_type_id).first()
     #list of parameters
     parameters = device_type.parameters
@@ -384,7 +368,7 @@ def device_detail(system_id, device_id):
     #list of kpi states for parameters
     kpi_states = get_kpi_states(values,kpis)
     return render_template('device_detail.html', device_id=int(device_id), system_id=system_id,user=current_user,values=values,
-                           parameters=parameters,kpis=kpis,kpi_parameters_states=kpi_states,default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip)
+                           parameters=parameters,kpis=kpis,kpi_parameters_states=kpi_states,default_datetime=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),zip=zip, title=title)
     
 @auth.route("/systems/<int:system_id>/devices/create/",methods=['GET', 'POST'])
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/edit/",methods=['GET', 'POST'])
@@ -401,6 +385,9 @@ def device_create(system_id, device_id = None):
 
     if device_id:
         device = Device.query.get_or_404(device_id)
+        form.device_type.validate_choice = False
+        form.device_type.validators = []
+        form.device_type.flags.disabled = True  
 
     if form.validate_on_submit():
         if not device_id:
@@ -417,7 +404,6 @@ def device_create(system_id, device_id = None):
         form.device_name.data = device.name
         form.device_description.data = device.description
         form.device_type.data = device.device_type_id
-        form.device_type.flags.disabled = True
         title = f"Edit device {device_id}"
 
 
@@ -499,39 +485,45 @@ def kpi_create(system_id, kpi_id = None):
         form.upper_limit.data = kpi.upper_limit
         title = f"Edit KPI {kpi_id}"
 
-    return render_template('kpi_create.html', form=form)
+    return render_template('kpi_create.html', form=form, title=title)
 
 @auth.route("/devices_&_parameters/",methods=['GET','POST'])
+@login_required
 def manage_devices_and_parameters():
-    if not current_user.is_authenticated or  current_user.role != "admin":
+    if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
+    title = "Device and parameter manager"
     device_types = DeviceType.query.all()
     parameters = Parameter.query.all()
-    return render_template('devicetypes_parameters.html', device_types=device_types,parameters = parameters)
+    return render_template('devicetypes_parameters.html', device_types=device_types,parameters = parameters, title=title)
 
 @auth.route("/device_types/<int:device_type_id>/edit",methods=['GET','POST'])
+@login_required
 def edit_device_type(device_type_id):
-    if not current_user.is_authenticated or  current_user.role != "admin":
+    if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
     form = DeviceTypeEditForm()
     if form.validate_on_submit(form):
         device_type = DeviceType.query.filter_by(id=device_type_id).first()
         device_type.name = form.device_type_name.data
         db.session.commit()
+        #TODO fix
         title = f"Edit device {device_type_id}"
     else:
         pass
     return "<p>aaaaaaaaaa</p>"
 
 @auth.route("/parameters/<int:parameter_id>/edit",methods=['GET','POST'])
-def deleter_edit(parameter_id):
-    if not current_user.is_authenticated or  current_user.role != "admin":
+@login_required
+def parameter_edit(parameter_id):
+    if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
     return redirect('/devices_&_parameters/')
 
 @auth.route("/device_types/<int:device_type_id>/delete",methods=['GET','POST'])
+@login_required
 def delete_device_type(device_type_id):
-    if not current_user.is_authenticated or  current_user.role != "admin":
+    if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
     device_type = DeviceType.query.get_or_404(device_type_id)
     db.session.delete(device_type)
@@ -539,8 +531,9 @@ def delete_device_type(device_type_id):
     return render_template("devicetypes_parameters.html")
 
 @auth.route("/parameters/<int:parameter_id>/delete",methods=['GET','POST'])
-def deleter_parameter(parameter_id):
-    if not current_user.is_authenticated or  current_user.role != "admin":
+@login_required
+def delete_parameter(parameter_id):
+    if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
     parameter = Parameter.query.get_or_404(parameter_id)
     if (parameter.device_types != []):
@@ -548,10 +541,3 @@ def deleter_parameter(parameter_id):
     db.session.delete(parameter)
     db.session.commit()
     return redirect('/devices_&_parameters/')
-
-
-
-# @auth.route("/test",methods=['GET', 'POST'])
-# @login_required
-# def test():
-#     pass

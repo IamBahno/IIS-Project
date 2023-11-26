@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container mb-4">
 
-    <h1>System: {{ system.name }}</h1>
+    <h1>{{title}}</h1>
     <p>{{ system.description }}</p>
     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
         <a class="btn btn-secondary" href="/systems/{{system.id}}/edit">Edit system</a>
@@ -78,12 +78,15 @@
         </div>
     {% endfor %}
 
-    {% if system.system_manager == user.id or user.role == "admin" %}
-
+    
     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+        {% if system.system_manager == user.id or user.role == "admin" %}
         <a class="btn btn-secondary" href="/systems/{{system.id}}/devices/create">Add device</a>
         <a class="btn btn-secondary" href="/systems/{{system.id}}/kpi/create">Define kpi</a>
+        {% endif %}
+        {% if user.role != "admin" and user.id != system.system_manager %}
+        <a class="btn btn-warning" href="/systems/{{system.id}}/requests/{{user.id}}/revoke/">Leave system</a>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 {% endblock content %}

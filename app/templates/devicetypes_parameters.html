@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
-    <ul class="list-group list-group-flush">
-        <h2>Device types:</h2>
+<div class="container">
+    <h2>{{title}}</h2>
+    <ul class="list-group list-group-flush mt-4">
+        <h3>Device types:</h3>
         {% for device_type in device_types %}
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
             <a class="btn btn-secondary" href="/device_types/{{device_type.id}}/edit">Edit device type</a>
@@ -18,7 +20,7 @@
     </ul>
 
     <ul class="list-group list-group-flush">
-        <h2>Paremeters:</h2>
+        <h3>Paremeters:</h3>
         {% for parameter in parameters %}
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
             <a class="btn btn-secondary" href="/parameters/{{parameter.id}}/edit">Delete device type</a>
@@ -33,4 +35,5 @@
         {% endfor %}
 
     </ul>
+</div>
 {% endblock %}
