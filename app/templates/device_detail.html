@@ -1,20 +1,30 @@
 {% extends "layout.html" %}
 {% block content %}
+<div class="container">
     {%  for value,parameter,kpis_for_parameter,kpi_states in zip(values,parameters,kpis,kpi_parameters_states) %}
-        {{parameter.name}}: {{value.value}} {{parameter.unit}}
-                {% for kpi,kpi_state in zip(kpis_for_parameter,kpi_states) %}
-                    <br>{{kpi.name}} {{kpi_state}}
-                {% endfor %}
-            {% if user.role == "broker" or user.role == "admin" %}
-                <form method="POST">
-                    <label for="value">Value</label>
-                    <input type="input" name="value" pattern="[0-9]+(\.[0-9]+)?">
-                    <label >{{parameter.unit}}</label>
-                    <input type="datetime-local" id="time" name="time" value="{{ default_datetime }}">
-                    <input type="hidden" name="parameter_id" value={{parameter.id}}>
-                    <button type="submit" name="add-value">Add</button>
-                </form>
-            {% endif %}
-        <br>
+    <h3 class="row mb-4 ms-1">
+        {{parameter.name}}{% if value.value %}: {{value.value}} {{parameter.unit}}{% endif %}
+    </h3>
+    {% if user.role == "broker" or user.role == "admin" %}
+    <form class="row justify-content-md-center" method="POST" action="/systems/{{system_id}}/devices/{{device_id}}/parameters/{{parameter.id}}/add/">
+        <div class="col-12 col-md-5 col-lg-4 col-xl-3">
+            <div class="form-floating mb-3">
+                <input class="form-control" type="number" step="0.01" name="value" placeholder="">
+                <label for="value">Value ({{parameter.unit}})</label>
+            </div>
+        </div>
+        <div class="col-12 col-md-5 col-lg-4 col-xl-3">
+            <div class="form-floating mb-3">
+                <input class="form-control" type="datetime-local" id="time" name="time" value="{{ default_datetime }}">
+                <label for="value">Date</label>
+            </div>
+        </div>
+        <div class="col-12 col-md-1 d-grid d-md-inline-block">
+            <button class="btn btn-primary mt-2" type="submit" name="add-value">Save</button>
+        </div>
+    </form>
+    {% endif %}
+    <br>
     {% endfor %}
+</div>
 {% endblock content %}

@@ -13,13 +13,13 @@ auth = Blueprint('auth', __name__)
 #TODO create parameter device_type
 #TODO kdyz nejse smazat parameter neco vypsat
 #TODO device_type edit
-#TODO device detail styles
-#TODO device detail form rewrite
+#// TODO device detail styles
 #TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
 #TODO udelat edit ke vsemu (edit jmena osoby,kpi hodnoty, jmena device etc.....) bud predelat create page aby meli parameter create/edit 
 #                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
 #TODO vypisovat vsude nejakej rozumnej header (treaba kdyz vytvaris device aby byl tam byl vypsanej system nebo tak neco )
 #TODO zajisti koretkni vstupy
+#TODO session expiration
 
 @auth.route("/login/", methods=['GET', 'POST'])
 def login():
@@ -229,19 +229,34 @@ def device_delete(system_id, device_id):
     db.session.commit()
     return redirect(url_for('auth.system_detail',system_id=system_id))
 
+@auth.route("/systems/<int:system_id>/devices/<int:device_id>/parameters/<int:param_id>/add/",methods=['GET', 'POST'])
+@login_required
+def set_param_data(system_id, device_id, param_id):
+    system = System.query.get_or_404(system_id)
+    
+    if current_user.role != "admin" and current_user.id != system.system_manager and current_user.role != "broker":
+        abort(403)
+
+    device = Device.query.get_or_404(device_id)
+    param = Parameter.query.get_or_404(param_id)
+
+    if "value" not in request.values or "time" not in request.values:
+        abort(400)
+
+    try:
+        value_value = int(request.values["value"])
+    except:
+        value_value = float(request.values["value"])
+
+    value = Value(value=value_value,timestamp=request.values["time"],setter=current_user.id,device=device_id,parameter=param_id)
+    db.session.add(value)
+    db.session.commit()
+
+    return redirect(url_for('auth.device_detail', system_id=system_id, device_id=device_id))
 
 @auth.route("/systems/<int:system_id>/devices/<int:device_id>/",methods=['GET', 'POST'])
 @login_required
 def device_detail(system_id, device_id):
-    if "add-value" in request.values:
-        value_value = request.values["value"]
-        try:
-            value_value = int(value_value)
-        except:
-            value_value = float(value_value)
-        value = Value(value=value_value,timestamp=request.values["time"],setter=current_user.id,device=device_id,parameter=request.values["parameter_id"])
-        db.session.add(value)
-        db.session.commit()
     device = Device.query.get_or_404(device_id)
     title = device.name
 
