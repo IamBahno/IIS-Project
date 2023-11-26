@@ -35,11 +35,15 @@
             <div class="card-body">
                 <h5 class="card-title">{{device.name}}</h5>
                 <p class="card-text">{{device.description}}</p>
+                <hr>
+                <h6>Parameters:</h6>
                 <ul class="list-group list-group-flush">
                     {% for parameter,value,kpis,kpi_states in zip(parameters,values,kpis_of_parameters,kpis_states_of_parameters) %}
                     <li class="list-group-item">{{parameter.name}}: {{value.value}} {{parameter.unit}}</li>
                     {% endfor %}
                 </ul>
+                <hr>
+                <h6>KPIs</h6>
                 <ul class="list-group list-group-flush">
                     {% for parameter,value,kpis,kpi_states in zip(parameters,values,kpis_of_parameters,kpis_states_of_parameters) %}
                             {% for kpi,kpi_state in zip(kpis,kpi_states) %}
