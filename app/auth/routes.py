@@ -11,10 +11,11 @@ auth = Blueprint('auth', __name__)
 #TODO sipku zpet
 #TODO admin manage Users, (delete, change password ?)
 #TODO create parameter device_type
-#TODO kdyz nejde smazat parameter neco vypsat
+#// TODO kdyz nejde smazat parameter neco vypsat
 #TODO device_type edit
-#// TODO device detail styles
+#TODO device detail styles
 #TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
+
 #TODO udelat edit ke vsemu (edit jmena osoby,kpi hodnoty, jmena device etc.....) bud predelat create page aby meli parameter create/edit 
 #                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
 #TODO vypisovat vsude nejakej rozumnej header (treaba kdyz vytvaris device aby byl tam byl vypsanej system nebo tak neco )
@@ -405,7 +406,8 @@ def manage_devices_and_parameters():
     title = "Device and parameter manager"
     device_types = DeviceType.query.all()
     parameters = Parameter.query.all()
-    return render_template('devicetypes_parameters.html', device_types=device_types,parameters = parameters, title=title)
+    error = request.args.get('error')
+    return render_template('devicetypes_parameters.html', device_types=device_types,parameters = parameters, title=title, error=error)
 
 @auth.route("/device_types/create",methods=['GET','POST'])
 @login_required
@@ -436,6 +438,8 @@ def delete_device_type(device_type_id):
     if not current_user.is_authenticated or current_user.role != "admin":
         abort(403)
     device_type = DeviceType.query.get_or_404(device_type_id)
+    if (device_type.devices != []):
+        return redirect(url_for("auth.manage_devices_and_parameters", error="device in use"))
     db.session.delete(device_type)
     db.session.commit()
     return redirect(url_for('auth.manage_devices_and_parameters'))
@@ -464,7 +468,7 @@ def delete_parameter(parameter_id):
         abort(403)
     parameter = Parameter.query.get_or_404(parameter_id)
     if (parameter.device_types != []):
-        return redirect(url_for("auth.manage_devices_and_parameters"),code=307)
+        return redirect(url_for("auth.manage_devices_and_parameters", error="parameter in use"))
     db.session.delete(parameter)
     db.session.commit()
     return redirect(url_for('auth.manage_devices_and_parameters'))
