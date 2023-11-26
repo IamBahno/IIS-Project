@@ -566,36 +566,68 @@ def get_graph(device):
         chi = []
         for l in lol:
             if l == None:
-                return None
+                chi = []
+                break
             chi.append((l.timestamp,l.value))
         datas.append(chi)
+    
+    some_data_found = False
+    for dat in datas:
+        if dat != []:
+            some_data_found=True
+    if some_data_found == False:
+        return None
+
     # print(datas)
     # data = datas[0]
     # data = [(1, 10), (2, 15), (3, 8), (4, 20)]
 
     # Create a simple plot with transparent background and custom styling
     # fig, ax = plt.subplots()
-    fig, ax = plt.subplots(len(datas), 1, figsize=(8, 6))
-    for i,(data,par) in enumerate(zip(datas,pars)):
-        ax[i].plot([entry[0] for entry in data], [entry[1] for entry in data], color='orange', marker='o', linestyle='-', linewidth=2)
-        ax[i].set_title(par.name)
+    if (len(datas) == 1):
+        fig, ax = plt.subplots(len(datas), 1, figsize=(8, 6))
+        data=datas[0]
+        ax.plot([entry[0] for entry in data], [entry[1] for entry in data], color='orange', marker='o', linestyle='-', linewidth=2)
+        ax.set_title(par.name)
         # Customize axis colors
-        ax[i].spines['bottom'].set_color('gray')
-        ax[i].spines['top'].set_color('gray')
-        ax[i].spines['right'].set_color('gray')
-        ax[i].spines['left'].set_color('gray')
+        ax.spines['bottom'].set_color('gray')
+        ax.spines['top'].set_color('gray')
+        ax.spines['right'].set_color('gray')
+        ax.spines['left'].set_color('gray')
         
-        ax[i].xaxis.label.set_color('gray')
-        ax[i].yaxis.label.set_color('gray')
+        ax.xaxis.label.set_color('gray')
+        ax.yaxis.label.set_color('gray')
         
-        ax[i].tick_params(axis='x', colors='gray')
-        ax[i].tick_params(axis='y', colors='gray')
+        ax.tick_params(axis='x', colors='gray')
+        ax.tick_params(axis='y', colors='gray')
         
-        ax[i].grid(color='lightgray', linestyle='--', linewidth=0.5)
+        ax.grid(color='lightgray', linestyle='--', linewidth=0.5)
         
-        ax[i].set_xlabel('Timestamp')
-        ax[i].set_ylabel('Value')
-        ax[i].set_facecolor((0, 0, 0, 0))  # Transparent background
+        ax.set_xlabel('Timestamp')
+        ax.set_ylabel('Value')
+        ax.set_facecolor((0, 0, 0, 0))  # Transparent background
+    else:
+        fig, ax = plt.subplots(len(datas), 1, figsize=(8, 6))
+        for i,(data,par) in enumerate(zip(datas,pars)):
+            ax[i].plot([entry[0] for entry in data], [entry[1] for entry in data], color='orange', marker='o', linestyle='-', linewidth=2)
+            ax[i].set_title(par.name)
+            # Customize axis colors
+            ax[i].spines['bottom'].set_color('gray')
+            ax[i].spines['top'].set_color('gray')
+            ax[i].spines['right'].set_color('gray')
+            ax[i].spines['left'].set_color('gray')
+            
+            ax[i].xaxis.label.set_color('gray')
+            ax[i].yaxis.label.set_color('gray')
+            
+            ax[i].tick_params(axis='x', colors='gray')
+            ax[i].tick_params(axis='y', colors='gray')
+            
+            ax[i].grid(color='lightgray', linestyle='--', linewidth=0.5)
+            
+            ax[i].set_xlabel('Timestamp')
+            ax[i].set_ylabel('Value')
+            ax[i].set_facecolor((0, 0, 0, 0))  # Transparent background
     
     # plt.title('Value Changes Over Time')
     fig.tight_layout()
