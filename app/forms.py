@@ -115,3 +115,41 @@ class ParameterEditForm(FlaskForm):
     parameter_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
     parameter_unit = StringField("Unit*", validators = [DataRequired()])
     submit = SubmitField("Save")
+
+class UserEditForm(FlaskForm):
+    username_edit = HiddenField()
+    username = StringField("Username*", validators=[DataRequired()], render_kw={'autofocus': True})
+    first_name = StringField("First name*", validators=[DataRequired()])
+    last_name = StringField("Last name*", validators=[DataRequired()])
+    submit = SubmitField("Save")
+
+    def validate(self, extra_validators=None):
+        valid = super(UserEditForm, self).validate(extra_validators)
+        if not valid:
+            return False
+
+        #todo check
+        if self.username.data != self.username_edit.data:
+            try:
+                UsernameUnique(self, self.username)
+            except ValidationError as e:
+                self.system_name.errors.append(e)
+                return False
+
+        return True
+
+class PasswordEdit(FlaskForm):
+    password = PasswordField("Password*", validators=[DataRequired()])
+    passwordConfirm = PasswordField("Confirm password*", validators=[DataRequired()])
+    submit = SubmitField("Save")
+
+    def validate(self, extra_validators=None):
+        valid = super(PasswordEdit, self).validate(extra_validators)
+        if not valid:
+            return False
+
+        if self.password.data == self.passwordConfirm.data:
+            return True
+
+        self.passwordConfirm.errors.append('Passwords do not match.')
+        return False
