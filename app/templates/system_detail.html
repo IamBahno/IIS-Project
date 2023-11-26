@@ -31,7 +31,7 @@
     <!--  TODO nadepsat u device Parametry a KPIs -->
     <h3>Devices:</h3>
     {% for device,parameters,values,kpis_of_parameters,kpis_states_of_parameters in zip(devices,parameters,values,kpis_of_devices,kpis_states_of_devices) %} 
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">{{device.name}}</h5>
                 <p class="card-text">{{device.description}}</p>
@@ -68,7 +68,7 @@
 
     <h3 class="mt-4">KPIs</h3>
     {% for kpi, parameter in zip(kpis,parameters_of_kpis) %}
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">{{kpi.name}} ({{parameter.name}})</h5>
                 <p class="card-text">{{kpi.description}}</p>
