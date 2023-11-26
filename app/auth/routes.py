@@ -1,16 +1,14 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for, abort
-from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,devicetype_parameter
+from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,get_kpis_and_parameters,get_parameters_and_values,get_devices_and_types
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
-from flask_wtf import FlaskForm
-from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField, FloatField
-from wtforms.validators import DataRequired, ValidationError, Optional
 from is_safe_url import is_safe_url
 from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm
 
 auth = Blueprint('auth', __name__)
 
+#TODO sipku zpet
 #TODO admin manage Users, (delete, change password ?)
 #TODO create parameter device_type
 #TODO kdyz nejse smazat parameter neco vypsat
@@ -113,24 +111,24 @@ def system_detail(system_id):
 
     title = system.name
 
-    devices = Device.query.filter_by(system=system.id).all()
-    device_types = [DeviceType.query.filter_by(id=device.device_type_id).first()  for device in devices]
-    parameters_of_devices = [device_type.parameters for  device_type in device_types]
-    values_of_devices = []
-    for parameters,device in zip(parameters_of_devices,devices):
-        values = [Value.query.filter_by(parameter=parameter.id,device=device.id).order_by(Value.timestamp.desc()).first() for parameter in parameters]
-        values_of_devices.append(values)
-    
-    kpis = Kpi.query.filter_by(system=system_id).all()
-    parameters = Parameter.query.all()
-    parameters_of_kpis = [Parameter.query.filter_by(id=kpi.id).all() for kpi in kpis]
+    devices,device_types = get_devices_and_types(system_id)
 
-    
-        #list of kpis for each parameter
+
+    parameters_of_devices,values_of_devices = [],[]
+    for device in devices:
+        parameters,values = get_parameters_and_values(device.id)
+        parameters_of_devices.append(parameters)
+        values_of_devices.append(values)
+
+
+    parameters_of_kpis, kpis = get_kpis_and_parameters(system.id)
+
+
+    #list of kpis for each parameter
     kpis_of_devices = [[Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters] for parameters in parameters_of_devices]
     kpis_states = [get_kpi_states(values,kpis) for values,kpis in zip(values_of_devices,kpis_of_devices)]
     return render_template('system_detail.html',system=system,devices=devices,user=current_user,zip = zip,parameters = parameters_of_devices,
-                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=zip(kpis, parameters_of_kpis), title=title)
+                           values=values_of_devices,kpis_of_devices=kpis_of_devices,kpis_states_of_devices=kpis_states, kpis=kpis, parameters_of_kpis=parameters_of_kpis, title=title)
 
 
 @auth.route("/systems/<int:system_id>/request/", methods=['GET', 'POST'])
@@ -236,7 +234,6 @@ def device_delete(system_id, device_id):
 @login_required
 def device_detail(system_id, device_id):
     if "add-value" in request.values:
-        print("aaaaaaaaaaddddddddddd")
         value_value = request.values["value"]
         try:
             value_value = int(value_value)
@@ -248,18 +245,7 @@ def device_detail(system_id, device_id):
     device = Device.query.get_or_404(device_id)
     title = device.name
 
-    parameters_and_values = (
-        db.session.query(Parameter, Value)
-        .join(DeviceType, Parameter.device_types)
-        .join(Device, DeviceType.devices)
-        .outerjoin(Value, (Value.parameter == Parameter.id) & (Value.device == device_id))
-        .filter(Device.id == device_id)
-        .order_by(Parameter.id, Value.timestamp.desc())
-        .distinct(Parameter.id)
-        .all()
-    )
-    transposed_list = list(zip(*parameters_and_values))
-    parameters, values = transposed_list
+    parameters,values = get_parameters_and_values(device.id)
 
     #list of kpis for each parameter
     kpis = [Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters]
