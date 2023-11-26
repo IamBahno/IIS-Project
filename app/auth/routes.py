@@ -1,11 +1,8 @@
 from flask import render_template, request, Blueprint, flash, redirect, url_for, abort
-from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,get_kpis_and_parameters,devicetype_parameter,get_parameters_and_values,get_devices_and_types
+from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,get_kpis_and_parameters,get_parameters_and_values,get_devices_and_types
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
-from flask_wtf import FlaskForm
-from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField, FloatField
-from wtforms.validators import DataRequired, ValidationError, Optional
 from is_safe_url import is_safe_url
 from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm
 
