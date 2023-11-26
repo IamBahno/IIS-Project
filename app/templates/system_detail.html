@@ -5,14 +5,24 @@
     <h1>System: {{ system.name }}</h1>
     <p>{{ system.description }}</p>
     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-4">
-            <a class="btn btn-secondary" href="/systems/{{system.id}}/edit">Edit system</a>
+        <a class="btn btn-secondary" href="/systems/{{system.id}}/edit">Edit system</a>
     </div>
     <!-- TODO: zadosti o system -->
-    {% if system.system_manager == user.id or user.role == "admin" %}
-        {% for request in system.users_requesting %}
-        <a class="btn btn-success" href="/systems/{{system.id}}/requests/{{request.id}}/accept/">Accept</a>
-        <a class="btn btn-danger" href="/systems/{{system.id}}/requests/{{request.id}}/reject/">Reject</a>
-        {% endfor %}
+    {% if (system.system_manager == user.id or user.role == "admin") and system.users_requesting |length != 0 %}
+    <div class="mb-4">
+        <h2>Requests:</h2>
+        <ul class="list-group">
+            {% for request in system.users_requesting %}
+            <li class="list-group-item d-grid gap-2 d-md-flex justify-content-md-end" style="min-height:60px;">
+                <div class="col text-md-start text-center" style="margin-top:auto;margin-bottom:auto">User: {{request.username}}</div>
+                <div class="col d-grid gap-2 d-md-flex justify-content-md-end" style="height:min-content;margin-top:auto;margin-bottom:auto;">
+                    <a class="btn btn-success" href="/systems/{{system.id}}/requests/{{request.id}}/accept/">Accept</a>
+                    <a class="btn btn-danger" href="/systems/{{system.id}}/requests/{{request.id}}/reject/">Reject</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
     {% endif %}
 
     <!--  TODO parameter values -->
