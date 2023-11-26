@@ -525,3 +525,24 @@ def edit_user(user_id):
             del form.role
         
     return render_template('edit_user.html', form=form, title=title)
+
+@auth.route("/users/<int:user_id>/edit_password/",methods=['GET','POST'])
+@fresh_login_required
+def edit_password(user_id):
+    if current_user.id != user_id and current_user.role != "admin":
+        abort(403)
+
+    form = PasswordEdit()
+    title = f"Edit user {user_id}'s password"
+
+    user = User.query.get_or_404(user_id)
+
+    if form.validate_on_submit():
+        user.hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+
+        db.session.commit()
+
+        return redirect(url_for('auth.home'))
+        
+    return render_template('edit_password.html', form=form, title=title)
+
