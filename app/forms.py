@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, SubmitField, StringField, PasswordField, validators, HiddenField, TextAreaField, SelectField, FloatField, SelectMultipleField
-from wtforms.validators import DataRequired, ValidationError, Optional
+from wtforms.validators import DataRequired, ValidationError, Optional, Length
 from app.models import User,System
 from app import bcrypt
 
@@ -16,10 +16,9 @@ def SystemUnique(form, field):
 
 
 class RegisterForm(FlaskForm):
-    #todo limit field lengths?
-    username = StringField("Username*", validators=[DataRequired(), UsernameUnique], render_kw={'autofocus': True})
-    first_name = StringField("First name*", validators=[DataRequired()])
-    last_name = StringField("Last name*", validators=[DataRequired()])
+    username = StringField("Username*", validators=[DataRequired(), UsernameUnique, Length(max=20)], render_kw={'autofocus': True})
+    first_name = StringField("First name*", validators=[DataRequired(), Length(max=30)])
+    last_name = StringField("Last name*", validators=[DataRequired(), Length(max=30)])
     password = PasswordField("Password*", validators=[DataRequired()])
     passwordConfirm = PasswordField("Confirm password*", validators=[DataRequired()])
     submit = SubmitField("Register")
@@ -36,8 +35,8 @@ class RegisterForm(FlaskForm):
         return False
 
 class KPIEditForm(FlaskForm):
-    kpi_name = StringField("Name*", validators=[DataRequired()], render_kw={'autofocus': True})
-    kpi_description = TextAreaField("Description")
+    kpi_name = StringField("Name*", validators=[DataRequired(), Length(max=30)], render_kw={'autofocus': True})
+    kpi_description = TextAreaField("Description", validators=[Length(max=200)])
     parameter = SelectField("Parameter*", validators=[DataRequired()], coerce=int)
     lower_limit = FloatField("Lower limit", validators=[Optional()])
     upper_limit = FloatField("Upper limit", validators=[Optional()])
@@ -61,8 +60,7 @@ class KPIEditForm(FlaskForm):
         return True
 
 class LoginForm(FlaskForm):
-    #todo limit field lengths?
-    username = StringField("Username*", validators=[DataRequired()], render_kw={'autofocus': True})
+    username = StringField("Username*", validators=[DataRequired(), Length(max=20)], render_kw={'autofocus': True})
     password = PasswordField("Password*", validators=[DataRequired()])
     submit = SubmitField("Log in")
 
@@ -80,10 +78,9 @@ class LoginForm(FlaskForm):
         return False
 
 class SystemEditForm(FlaskForm):
-    #todo limit field lengths?
     system_name_edit = HiddenField()
-    system_name = StringField("System name*", validators=[DataRequired()], render_kw={'autofocus': True})
-    system_description = TextAreaField("System description")
+    system_name = StringField("System name*", validators=[DataRequired(), Length(max=50)], render_kw={'autofocus': True})
+    system_description = TextAreaField("System description", validators=[Length(max=200)])
     submit = SubmitField("Save")
 
     def validate(self, extra_validators=None):
@@ -91,7 +88,6 @@ class SystemEditForm(FlaskForm):
         if not valid:
             return False
 
-        #todo check
         if self.system_name.data != self.system_name_edit.data:
             try:
                 SystemUnique(self, self.system_name)
@@ -102,26 +98,26 @@ class SystemEditForm(FlaskForm):
         return True
 
 class DeviceEditForm(FlaskForm):
-    device_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
-    device_description = TextAreaField("Description")
+    device_name = StringField("Name*", validators = [DataRequired(), Length(max=50)], render_kw={'autofocus': True})
+    device_description = TextAreaField("Description", validators=[Length(max=200)])
     device_type = SelectField("Type*", validators=[DataRequired()], coerce=int)
     submit = SubmitField("Save")
     
 class DeviceTypeEditForm(FlaskForm):
-    devicetype_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
+    devicetype_name = StringField("Name*", validators = [DataRequired(), Length(max=50)], render_kw={'autofocus': True})
     parameters = SelectMultipleField("Parameters*", validators=[DataRequired()], coerce=int)
     submit = SubmitField("Save")
 
 class ParameterEditForm(FlaskForm):
-    parameter_name = StringField("Name*", validators = [DataRequired()], render_kw={'autofocus': True})
-    parameter_unit = StringField("Unit*", validators = [DataRequired()])
+    parameter_name = StringField("Name*", validators = [DataRequired(), Length(max=50)], render_kw={'autofocus': True})
+    parameter_unit = StringField("Unit*", validators = [DataRequired(), Length(max=50)])
     submit = SubmitField("Save")
 
 class UserEditForm(FlaskForm):
     username_edit = HiddenField()
-    username = StringField("Username*", validators=[DataRequired()], render_kw={'autofocus': True})
-    first_name = StringField("First name*", validators=[DataRequired()])
-    last_name = StringField("Last name*", validators=[DataRequired()])
+    username = StringField("Username*", validators=[DataRequired(), Length(max=20)], render_kw={'autofocus': True})
+    first_name = StringField("First name*", validators=[DataRequired(), Length(max=30)])
+    last_name = StringField("Last name*", validators=[DataRequired(), Length(max=30)])
     role = SelectField("Parameter*", validators=[DataRequired()], choices=[('admin', "Admin"), ('broker', "Broker"), ('user', "User")])
     submit = SubmitField("Save")
 
@@ -130,7 +126,6 @@ class UserEditForm(FlaskForm):
         if not valid:
             return False
 
-        #todo check
         if self.username.data != self.username_edit.data:
             try:
                 UsernameUnique(self, self.username)
