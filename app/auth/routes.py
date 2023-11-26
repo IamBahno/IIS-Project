@@ -8,18 +8,6 @@ from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEd
 
 auth = Blueprint('auth', __name__)
 
-#TODO sipku zpet
-#TODO admin manage Users, (delete, change password ?)
-#TODO create parameter device_type
-#// TODO kdyz nejde smazat parameter neco vypsat
-#TODO device_type edit
-#TODO device detail styles
-#TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
-
-#TODO udelat edit ke vsemu (edit jmena osoby,kpi hodnoty, jmena device etc.....) bud predelat create page aby meli parameter create/edit 
-#                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
-#TODO vypisovat vsude nejakej rozumnej header (treaba kdyz vytvaris device aby byl tam byl vypsanej system nebo tak neco )
-#TODO zajisti koretkni vstupy
 
 @auth.route("/refresh/", methods=['GET', 'POST'], endpoint="refresh")
 @auth.route("/login/", methods=['GET', 'POST'])
@@ -118,7 +106,7 @@ def system_delete(system_id):
 @login_required
 def system_detail(system_id):
     system=System.query.get_or_404(system_id)
-    if system not in current_user.used_systems and current_user.id != system.system_manager and current_user.role != "admin" and current_user.role != "broker":
+    if system not in current_user.used_systems and current_user.id != system.system_manager and current_user.role not in ["admin","broker"] :
         abort(403)
 
     title = system.name
@@ -520,7 +508,6 @@ def edit_user(user_id):
         
         if current_user.role == "admin":
             user.role = form.role.data
-
         db.session.commit()
 
         return redirect(url_for('auth.home'))

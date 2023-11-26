@@ -1,9 +1,9 @@
 from app import create_app
-from flask import session
+from flask import session,request
 from datetime import timedelta
 app = create_app()
 @app.before_request
-def make_session_permanent():
+def my_before_request():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=3)
 if __name__ == '__main__':
