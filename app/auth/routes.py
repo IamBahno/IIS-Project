@@ -1,4 +1,4 @@
-from flask import render_template, request, Blueprint, flash, redirect, url_for, abort
+from flask import render_template, request, Blueprint, flash, redirect, url_for, abort,session
 from app.models import User,System, Parameter, DeviceType, Device,Value,Kpi,delete_system_request,parameters_of_system,system_all_ok,get_kpi_states,get_kpis_and_parameters,get_parameters_and_values,get_devices_and_types
 from app import db, bcrypt
 from flask_login import login_user, logout_user, login_required, current_user, fresh_login_required, confirm_login, login_fresh
@@ -11,7 +11,7 @@ auth = Blueprint('auth', __name__)
 #TODO sipku zpet
 #TODO admin manage Users, (delete, change password ?)
 #TODO create parameter device_type
-#TODO kdyz nejse smazat parameter neco vypsat
+#TODO kdyz nejde smazat parameter neco vypsat
 #TODO device_type edit
 #// TODO device detail styles
 #TODO otestovat co se stane kdy admin smaze device_type kterej je v nejakym systemu
@@ -19,7 +19,6 @@ auth = Blueprint('auth', __name__)
 #                       a pak to tam dost prepsat nebo zkopirovat veci z create a predelat to na edit
 #TODO vypisovat vsude nejakej rozumnej header (treaba kdyz vytvaris device aby byl tam byl vypsanej system nebo tak neco )
 #TODO zajisti koretkni vstupy
-#TODO session expiration
 
 @auth.route("/refresh/", methods=['GET', 'POST'], endpoint="refresh")
 @auth.route("/login/", methods=['GET', 'POST'])
@@ -469,3 +468,20 @@ def delete_parameter(parameter_id):
     db.session.delete(parameter)
     db.session.commit()
     return redirect(url_for('auth.manage_devices_and_parameters'))
+
+@auth.route("/users/",methods=['GET','POST'])
+@login_required
+def manage_users():
+    if not current_user.is_authenticated or current_user.role != "admin":
+        abort(403)
+    title = "Users"
+    users = User.query.all()
+    return render_template('users.html',users = users, title=title)
+
+@auth.route("/users/<int:user_id>/delete/",methods=['GET','POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_authenticated or (current_user.role != "admin" and current_user.id != user_id):
+        abort(403)
+    User.delete(user_id)
+    return redirect(url_for('auth.manage_users'))

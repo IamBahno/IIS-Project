@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mb-4">
+
+    <h3>{{title}}</h3>
+    {% for user in users %} 
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{user.username}}</h5>
+            <p class="card-text">First name: {{user.first_name}}</p>
+            <p class="card-text">Last name: {{user.last_name}}</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a class="btn btn-primary" href="/users/{{user.id}}/delete/">Delete</a>
+                <a class="btn btn-primary" href="/systems/">Edit</a>
+                <a class="btn btn-primary" href="/systems/">Change password</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endfor %}
+{% endblock content %}
