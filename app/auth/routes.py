@@ -550,36 +550,34 @@ def edit_password(user_id):
     return render_template('edit_password.html', form=form, title=title)
 
 def get_graph(device):
-    #img
     datas = []
-    pars = DeviceType.query.filter_by(id=device.device_type_id).first().parameters
-    for par in pars:
-        # lol = db.session.query(Value).join(Parameter,DeviceType.parameters).filter(Parameter.id == par.id).join(Device,DeviceType.devices).filter(Device.id==device_id).join(Value,Device.values).all()
-        lol = (db.session.query(Value).join(DeviceType, Parameter.device_types)
-               .filter(Parameter.id==par.id)
+    parameters = DeviceType.query.filter_by(id=device.device_type_id).first().parameters
+    for parameter in parameters:
+        values = (db.session.query(Value).join(DeviceType, Parameter.device_types)
+               .filter(Parameter.id==parameter.id)
                .join(Device, DeviceType.devices)
                 .outerjoin(Value, (Value.parameter == Parameter.id) & (Value.device == device.id))
                 .filter(Device.id == device.id)
                 .order_by(Parameter.id, Value.timestamp.asc())
                 .all()
                 )
-        chi = []
-        for l in lol:
-            if l == None:
-                chi = []
+        timestamp_and_value = []
+        for value in values:
+            if value == None:
+                timestamp_and_value = []
                 break
-            chi.append((l.timestamp,l.value))
-        datas.append(chi)
+            timestamp_and_value.append((value.timestamp,value.value))
+        datas.append(timestamp_and_value)
     
     images = []
 
 
-    for data,par in zip(datas,pars):
+    for data,parameter in zip(datas,parameters):
         if data == []:
             images.append(None)
         fig, ax = plt.subplots(1, 1, figsize=(8, 6))
         ax.plot([entry[0] for entry in data], [entry[1] for entry in data], color='orange', marker='o', linestyle='-', linewidth=2)
-        ax.set_title(par.name,color='white')
+        ax.set_title(parameter.name,color='white')
         # Customize axis colors
         ax.spines['bottom'].set_color('gray')
         ax.spines['top'].set_color('gray')
