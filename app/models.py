@@ -54,6 +54,12 @@ class User(db.Model, UserMixin):
         db.session.delete(user)
         db.session.commit()
 
+    @classmethod
+    def get_all(cls):
+        users = User.query.all()
+        return users
+
+
 class System(db.Model):
     __tablename__ = "system"
     id = db.Column(db.Integer, primary_key=True)
@@ -113,6 +119,12 @@ class Parameter(db.Model):
 
     # 1:N parameter value
     values = db.relationship('Value',backref="parameter_back_ref")
+
+    @classmethod
+    def delete(cls, parameter_id):
+        parameter = User.query.filter_by(id=parameter_id).first()
+        db.session.delete(parameter)
+        db.session.commit()
 
 #user define kpi for given parameter
 class Kpi(db.Model):
@@ -247,3 +259,14 @@ def get_kpis_and_parameters(system_id):
     transposed_list = list(zip(*kpis_and_parameters))
     parameters_of_kpis, kpis = transposed_list
     return parameters_of_kpis,kpis
+
+def values_of_device(parameter_id,device_id):
+    values = (db.session.query(Value).join(DeviceType, Parameter.device_types)
+               .filter(Parameter.id==parameter_id)
+               .join(Device, DeviceType.devices)
+                .outerjoin(Value, (Value.parameter == Parameter.id) & (Value.device == device_id))
+                .filter(Device.id == device_id)
+                .order_by(Parameter.id, Value.timestamp.asc())
+                .all()
+                )
+    return values

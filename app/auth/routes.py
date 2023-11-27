@@ -5,10 +5,8 @@ from flask_login import login_user, logout_user, login_required, current_user, f
 from datetime import datetime
 from is_safe_url import is_safe_url
 from app.forms import RegisterForm,KPIEditForm,LoginForm,SystemEditForm,DeviceEditForm,DeviceTypeEditForm,ParameterEditForm,UserEditForm,PasswordEdit
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from io import BytesIO
-import base64
+from app.auth.graph import get_graphs
+
 auth = Blueprint('auth', __name__)
 
 
@@ -265,10 +263,9 @@ def device_detail(system_id, device_id):
     device = Device.query.get_or_404(device_id)
     title = device.name
     
-    images = get_graph(device)
+    images = get_graphs(device)
     
 
-    #img end
     parameters,values = get_parameters_and_values(device.id)
     #list of kpis for each parameter
     kpis = [Kpi.query.filter_by(parameter_id=parameter.id,system=system_id).all() for parameter in parameters]
@@ -472,8 +469,7 @@ def delete_parameter(parameter_id):
     parameter = Parameter.query.get_or_404(parameter_id)
     if (parameter.device_types != []):
         return redirect(url_for("auth.manage_devices_and_parameters", error="parameter in use"))
-    db.session.delete(parameter)
-    db.session.commit()
+    Parameter.delete(parameter_id)
     return redirect(url_for('auth.manage_devices_and_parameters'))
 
 @auth.route("/users/",methods=['GET','POST'])
@@ -482,7 +478,7 @@ def manage_users():
     if current_user.role != "admin":
         abort(403)
     title = "Users"
-    users = User.query.all()
+    users = User.get_all()
     return render_template('users.html',users = users, title=title)
 
 @auth.route("/users/<int:user_id>/delete/",methods=['GET','POST'])
@@ -548,62 +544,3 @@ def edit_password(user_id):
         return redirect(url_for('auth.home'))
         
     return render_template('edit_password.html', form=form, title=title)
-
-def get_graph(device):
-    datas = []
-    parameters = DeviceType.query.filter_by(id=device.device_type_id).first().parameters
-    for parameter in parameters:
-        values = (db.session.query(Value).join(DeviceType, Parameter.device_types)
-               .filter(Parameter.id==parameter.id)
-               .join(Device, DeviceType.devices)
-                .outerjoin(Value, (Value.parameter == Parameter.id) & (Value.device == device.id))
-                .filter(Device.id == device.id)
-                .order_by(Parameter.id, Value.timestamp.asc())
-                .all()
-                )
-        timestamp_and_value = []
-        for value in values:
-            if value == None:
-                timestamp_and_value = []
-                break
-            timestamp_and_value.append((value.timestamp,value.value))
-        datas.append(timestamp_and_value)
-    
-    images = []
-
-
-    for data,parameter in zip(datas,parameters):
-        if data == []:
-            images.append(None)
-        fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-        ax.plot([entry[0] for entry in data], [entry[1] for entry in data], color='orange', marker='o', linestyle='-', linewidth=2)
-        ax.set_title(parameter.name,color='white')
-        # Customize axis colors
-        ax.spines['bottom'].set_color('gray')
-        ax.spines['top'].set_color('gray')
-        ax.spines['right'].set_color('gray')
-        ax.spines['left'].set_color('gray')
-        
-        ax.xaxis.label.set_color('gray')
-        ax.yaxis.label.set_color('gray')
-        
-        ax.tick_params(axis='x', colors='gray')
-        ax.tick_params(axis='y', colors='gray')
-        
-        ax.grid(color='lightgray', linestyle='--', linewidth=0.5)
-        
-        ax.set_xlabel('Timestamp')
-        ax.set_ylabel('Value')
-        ax.set_facecolor((0, 0, 0, 0))  # Transparent background
-    
-        # plt.title('Value Changes Over Time')
-        fig.tight_layout()
-        # Save the plot to a BytesIO object
-        img_data = BytesIO()
-        plt.savefig(img_data, format='png', transparent=True)
-        img_data.seek(0)
-
-        # Encode the image data to base64 for HTML embedding
-        img_base64 = base64.b64encode(img_data.read()).decode('utf-8')
-        images.append(img_base64)
-    return images
