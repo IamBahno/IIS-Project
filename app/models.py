@@ -193,8 +193,8 @@ def system_all_ok(system_id):
     kpi_states_of_devices = get_kpi_states(values_of_devices,kpis_of_devices)
     for kpi_states in kpi_states_of_devices:
         for state in kpi_states:
-            if state == "KO":
-                return "KO"
+            if state == "Error":
+                return "Error"
     return "OK"
 
 def get_kpi_states(values,kpis_for_parameters):
@@ -203,22 +203,22 @@ def get_kpi_states(values,kpis_for_parameters):
         kpis_states = []
         for kpi in kpis:
             if value == None or value.value == None:
-                kpis_states.append("KO")
+                kpis_states.append("Error")
             elif kpi.lower_limit == None:
                 if value.value <= kpi.upper_limit:
                     kpis_states.append("OK")
                 else:
-                    kpis_states.append("KO")
+                    kpis_states.append("Error")
             elif kpi.upper_limit == None:
                 if value.value >= kpi.lower_limit:
                     kpis_states.append("OK")
                 else:
-                    kpis_states.append("KO")
+                    kpis_states.append("Error")
             else:
                 if value.value <= kpi.upper_limit and value.value >= kpi.lower_limit:
                     kpis_states.append("OK")
                 else:
-                    kpis_states.append("KO")
+                    kpis_states.append("Error")
         kpis_states_for_parameters.append(kpis_states)
     return kpis_states_for_parameters
 
