@@ -69,19 +69,21 @@
 
 Instalace na server:
 <ul>
-<li>./setup.sh - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, vyšší verze budou taky fungovat </li>
-<li>source venv/bin/activate - aktivuje python vývojové prostředí</li>
-<li>python init_db.py - inicializuje databázi na linku definovanem v "app/config.py"</li>
-<li>gunicorn run:app - spustí aplikaci </li>
+<li>"./setup.sh" - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, vyšší verze budou taky fungovat </li>
+<li>"source venv/bin/activate" - aktivuje python vývojové prostředí</li>
+<li>"python init_db.py" - inicializuje databázi na linku definovanem v "app/config.py"</li>
+<li>"gunicorn run:app" - spustí aplikaci </li>
 </ul>
 
 Lokální instalace:
 <ul>
-<li>./setup.sh - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, vyšší verze budou taky fungovat </li>
-<li>source venv/bin/activate - aktivuje python vývojové prostředí</li>
+<li>"./setup.sh" - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, vyšší verze budou taky fungovat </li>
+<li>"source venv/bin/activate" - aktivuje python vývojové prostředí</li>
+<li>pokud se chcete připojit k online databázi na serveru tak už stačí jen spustit:  "./run.sh"</li>
+<li>pokud chcete otestovat schéma databáze lokálně:</li>
 <li>v "app/config.py" zakomentujte řádek s connection stringem a odkomentujte řádek pod ním (dle komentářů vně) abyste místo vytváření PostgreSQL databáze na serveru vytvořili a připojovali se k lokální SQLite databázi</li>
 <li>"python init_db.py"</li>
-<li>./run.sh - spustí aplikaci</li>
+<li>"./run.sh" - spustí aplikaci</li>
 </ul>
 
 
