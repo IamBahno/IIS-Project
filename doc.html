@@ -37,11 +37,9 @@
 	</dd>
 	<dt>URL aplikace</dt>
 	<dd><a href="https://iis-project.onrender.com">https://iis-project.onrender.com</a></dd>
-	<dd>(pokud má aplikace více vstupních stránek, napište obdobně další URL)</dd>
 </dl>
 
 <h2>Uživatelé systému pro testování</h2>
-<p>Uveďte prosím existující zástupce <strong>všech rolí uživatelů</strong>.</p>
 <table>
 <tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
 <tr><td>admin</td><td>admin_heslo</td><td>Administrátor</td></tr>
@@ -57,9 +55,9 @@
 <h2>Implementace</h2>
 <p>aplikace se nacházi ve složce app<br>
 	models.py - obsahuje modely databáze a funkce na queries
-	auth/routes.py - controler, implementuje témeř všechnu funkcionalitu aplikace
-	auth/graph.py - generuje graphy vyvoje hodnot v matplotlib
-	forms.py - obsahuje formuláře pro zadaváni hodnot psano pomocí wtforms
+	auth/routes.py - controller, implementuje témeř všechnu funkcionalitu aplikace
+	auth/graph.py - generuje grafy vývoje hodnot v matplotlib
+	forms.py - obsahuje formuláře pro zadáváni hodnot - psáno pomocí wtforms
 </p>
 
 <h3>Databáze</h3>
@@ -69,20 +67,19 @@
 
 <h2>Instalace</h2>
 
-Stručně popište: 
 Instalace na server:
 <ul>
-<li>./setup.sh - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, výšší verze budou taky fungovat </li>
-<li>source venv/bin/activate - aktivuje python vývojové prstředí</li>
-<li>python init_db.py - inicializuje databazi na linku definovanem v "app/config.py"</li>
+<li>./setup.sh - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, vyšší verze budou taky fungovat </li>
+<li>source venv/bin/activate - aktivuje python vývojové prostředí</li>
+<li>python init_db.py - inicializuje databázi na linku definovanem v "app/config.py"</li>
 <li>gunicorn run:app - spustí aplikaci </li>
 </ul>
 
-Instalace na lokálně:
+Lokální instalace:
 <ul>
-<li>./setup.sh - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, výšší verze budou taky fungovat </li>
-<li>source venv/bin/activate - aktivuje python vývojové prstředí</li>
-<li>v "app/config.py" zakomentujte řádek s connection stringem a odkomentujte řádek podtím (dle komentářu vně) abyste místo vytváření PostgreSQL databáze na serveru vytovřilia připojovali se k lokální SQLLite databízi</li>
+<li>./setup.sh - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, vyšší verze budou taky fungovat </li>
+<li>source venv/bin/activate - aktivuje python vývojové prostředí</li>
+<li>v "app/config.py" zakomentujte řádek s connection stringem a odkomentujte řádek pod ním (dle komentářů vně) abyste místo vytváření PostgreSQL databáze na serveru vytvořili a připojovali se k lokální SQLite databázi</li>
 <li>"python init_db.py"</li>
 <li>./run.sh - spustí aplikaci</li>
 </ul>
@@ -90,7 +87,7 @@ Instalace na lokálně:
 
 
 <h2>Známé problémy</h2>
-Žádné známe problémy
+Žádné známé problémy
 
 </body>
 </html>
