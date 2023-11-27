@@ -79,8 +79,8 @@ Lokální instalace:
 <ul>
 <li>./setup.sh - nainstaluje všechny potřebné balíčky a závislosti, očekává se verze pythonu 3.7, vyšší verze budou taky fungovat </li>
 <li>source venv/bin/activate - aktivuje python vývojové prostředí</li>
-<li>v "app/config.py" zakomentujte řádek s connection stringem a odkomentujte řádek pod ním (dle komentářů vně) abyste místo vytváření PostgreSQL databáze na serveru vytvořili a připojovali se k lokální SQLite databázi</li>
 <li>"python init_db.py"</li>
+<ul><li>Ve výchozím nastavení aplikace očekává databázi na externím serveru. Pro použití lokální databáze v "app/config.py" zakomentujte řádek s connection stringem a odkomentujte řádek pod ním (dle komentářů vně) abyste místo vytváření PostgreSQL databáze na serveru vytvořili a připojovali se k lokální SQLite databázi</li></ul>
 <li>./run.sh - spustí aplikaci</li>
 </ul>
 
