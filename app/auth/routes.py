@@ -249,8 +249,12 @@ def set_param_data(system_id, device_id, param_id):
     except:
         value_value = float(request.values["value"])
 
-    value = Value(value=value_value,timestamp=request.values["time"],setter=current_user.id,device=device_id,parameter=param_id)
-    db.session.add(value)
+    value = Value.query.filter_by(parameter=param_id, device=device_id, timestamp=request.values["time"]).first()
+    if value:
+        value.value=value_value
+    else:
+        value = Value(value=value_value,timestamp=request.values["time"],setter=current_user.id,device=device_id,parameter=param_id)
+        db.session.add(value)
     db.session.commit()
 
     return redirect(url_for('auth.device_detail', system_id=system_id, device_id=device_id))
