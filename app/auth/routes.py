@@ -240,8 +240,6 @@ def set_param_data(system_id, device_id, param_id):
     if current_user.role != "admin" and current_user.id != system.system_manager and current_user.role != "broker":
         abort(403)
 
-    device = Device.query.get_or_404(device_id)
-    param = Parameter.query.get_or_404(param_id)
 
     if "value" not in request.values or "time" not in request.values:
         abort(400)
